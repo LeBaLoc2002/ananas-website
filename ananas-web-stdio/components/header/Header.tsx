@@ -1,8 +1,9 @@
 import { Header } from 'antd/es/layout/layout';
 import React from 'react';
-import {MailOutlined , SettingOutlined , AppstoreOutlined} from '@ant-design/icons';
+import {MailOutlined , SettingOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import './Header.scss'
+
 const items = [
   {
     label: 'Navigation One',
@@ -118,10 +119,12 @@ const HeaderLayout  = () => {
         <Menu className='topmenu justify-end text-sm' mode="horizontal" items={items} />
       </div>
 
-
       <div className='row'>
       <Menu mode="horizontal" items={itemsCenter} />
       </div>
+      <div className='row'>
+      </div>
+   
     </Header>
 
   );

@@ -1,5 +1,4 @@
 import { Footer } from "antd/es/layout/layout";
-// import './FooterLayout.scss';
 
 const FooterLayout = () => {
   return (
@@ -44,7 +43,7 @@ const FooterLayout = () => {
           </div>
         </div>
 
-        <div className="flex justify-between items-center mt-8">
+        <div className="flex justify-center items-center mt-8">
           <div className="flex items-center">
             <div className="col-3">
               <a href="http://online.gov.vn/Home/WebDetails/61921">
