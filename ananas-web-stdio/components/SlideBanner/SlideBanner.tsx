@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function SlideBanner() {
   return (
-    <div className='home-instagram container mx-auto p-4 mt-20'>
+    <div className='home-instagram container mx-auto p-4 mt-32'>
     <Carousel autoplay>
       <div className="content-style sm:content-style-md lg:content-style-lg">
         <a href="https://ananas.vn/product-list?gender=&amp;category=&amp;attribute=tom" className="inline-block">
