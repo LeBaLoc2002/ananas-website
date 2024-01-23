@@ -8,12 +8,7 @@ import SlideBanner from '../SlideBanner/SlideBanner';
 
 const MainContent = () => {
   return (
-    <Content
-      style={{
-        margin: '24px 16px 0',
-        padding: '20px'
-      }}
-    >
+    <Content>
       <SlideBanner/>
       <HomeCollection/>
       <HomeBuy/>

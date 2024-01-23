@@ -4,27 +4,26 @@ import {CheckCircleOutlined , HeartOutlined , LoginOutlined, ShoppingCartOutline
 import { Menu } from 'antd';
 import './Header.scss'
 import { Carousel } from 'antd';
-
 const items = [
   {
     label: ' Tra cứu đơn hàng',
     key: 'Lookorders',
-    icon: <CheckCircleOutlined />,
+    icon: <CheckCircleOutlined   className="text-xs"/>,
   },
   {
     label: ' Yêu thích',
     key: 'favourite',
-    icon: <HeartOutlined />,
+    icon: <HeartOutlined  className="text-xs" />,
   },
   {
     label: 'Đăng nhập',
     key: 'Login',
-    icon: <LoginOutlined />,
+    icon: <LoginOutlined  className="text-xs"/>,
   },
   {
     label: 'Giỏ hàng',
     key: 'Cart',
-    icon: <ShoppingCartOutlined />,
+    icon: <ShoppingCartOutlined  className="text-xs"/>,
   },
 ];
 
@@ -123,7 +122,7 @@ const itemsCenter = [
       },
     ],
   },
-  
+
   {
     label: 'Sale Off',
     key: 'Sale',
@@ -140,15 +139,34 @@ const HeaderLayout  = () => {
         backgroundColor: '#fff'
       }}
     >
-      <div className='row '>
-        <Menu className='topmenu justify-end text-sm' mode="horizontal" items={items} />
+      <div className='row h-12'>
+      <Menu className='topmenu justify-end text-xs line-height-normal' mode="horizontal" items={items} />
       </div>
 
-      <div className='row '>
-      <Menu className='justify-center' mode="horizontal" items={itemsCenter} />
+      <div className="bg-white">
+        <div className="container mx-auto flex items-center justify-center">
+          {/* <div className="w-1/12">
+            <div className="navbar-brand">
+              <a href="https://ananas.vn">
+                <img
+                  src="https://ananas.vn/wp-content/themes/ananas/fe-assets/images/svg/Logo_Ananas_Header.svg"
+                  alt="Ananas Logo"
+                  className="mx-auto"
+                />
+              </a>
+            </div>
+          </div> */}
+
+          <div className="w-12/12">
+            <div className="flex items-center justify-center mx-auto font-bold">
+              <Menu mode="horizontal" className='italic' style={{fontSize:'23px'}} items={itemsCenter} />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className='row'>
+
+      <div className='row '>
         <Carousel autoplay>
         <div>
           <h3 className='m-0 h-20	 text-black leading-16 text-center bg-gray-300 p-4'>BUY 2 GET 10% OFF - ÁP DỤNG VỚI TẤT CẢ BASIC TEE</h3>

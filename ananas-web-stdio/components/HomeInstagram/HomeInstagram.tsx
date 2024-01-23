@@ -14,7 +14,7 @@ export default function HomeInstagram() {
             <div className="grid md:grid-cols-2 gap-4">
               <div className="post-item">
                 <a href="https://ananas.vn/urbas-corluray-pack/">
-                  <img src="https://ananas.vn/wp-content/uploads/kvngang_mobile_web-300x160.jpg" alt="News 1" className="w-full mb-2" />
+                  <img src="https://ananas.vn/wp-content/uploads/kvngang_mobile_web-300x160.jpg" alt="News 1" className="w-full mb-2 rounded	" />
                 </a>
                 <h3 className="post-title text-lg font-bold"><a href="https://ananas.vn/urbas-corluray-pack/">URBAS CORLURAY PACK</a></h3>
                 <p className="post-des text-sm mb-2">Urbas Corluray Pack đem đến lựa chọn “làm mới mình” với sự kết hợp 5 gam màu...</p>
@@ -23,7 +23,7 @@ export default function HomeInstagram() {
 
               <div className="post-item">
                 <a href="https://ananas.vn/urbas-corluray-pack/">
-                  <img src="https://ananas.vn/wp-content/uploads/kvngang_mobile_web-300x160.jpg" alt="News 1" className="w-full mb-2" />
+                  <img src="https://ananas.vn/wp-content/uploads/kvngang_mobile_web-300x160.jpg" alt="News 1" className="w-full mb-2 rounded	" />
                 </a>
                 <h3 className="post-title text-lg font-bold"><a href="https://ananas.vn/urbas-corluray-pack/">URBAS CORLURAY PACK</a></h3>
                 <p className="post-des text-sm mb-2">Urbas Corluray Pack đem đến lựa chọn “làm mới mình” với sự kết hợp 5 gam màu...</p>

@@ -37,11 +37,11 @@ const HomeBuy = () => {
       <div className="text-3xl font-bold mb-4 text-center">DANH MỤC MUA HÀNG</div>
       <div className="flex flex-wrap justify-center	">
         {categories.map((category, index) => (
-          <div key={index} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/4 p-2">
+          <div key={index} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/4 p-2 ">
             <div className="item relative">
               <div className="item-bg relative overflow-hidden">
                 <div className="black-bg absolute inset-0"></div>
-                <img src={category.imageUrl} alt={category.title} className="w-full object-cover" />
+                <img src={category.imageUrl} alt={category.title} className="w-full object-cover rounded	" />
               </div>
               <div className="item-group absolute inset-0 flex flex-col justify-center items-center text-white">
                 <a className="title text-lg font-semibold" href="#">
