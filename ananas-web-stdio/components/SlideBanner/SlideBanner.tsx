@@ -1,25 +1,6 @@
 import { Carousel } from 'antd';
 import React from 'react'
-type ContentStyleType = {
-    margin: number;
-    height: string;
-    color: string;
-    lineHeight: string;
-    textAlign: string | undefined;
-    backgroundColor: string;
-    padding: number;
-    maxHeight : string;
-  };
-  const contentStyle: ContentStyleType  = {
-    margin: 0,
-    height: '600px',
-    color: '#000',
-    lineHeight: '600px',
-    textAlign: 'center',
-    backgroundColor: '#f1f1f1',
-    padding: 4,
-    maxHeight : '100vh'
-  };
+
 export default function SlideBanner() {
   return (
     <div className='home-instagram container mx-auto p-4 mt-20'>
