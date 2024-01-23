@@ -3,26 +3,53 @@ import React from 'react';
 import {MailOutlined , SettingOutlined } from '@ant-design/icons';
 import { Menu } from 'antd';
 import './Header.scss'
+import { Carousel } from 'antd';
+
+type ContentStyleType = {
+  margin: number;
+  height: string;
+  color: string;
+  lineHeight: string;
+  textAlign: string | undefined;
+  backgroundColor: string;
+  padding: number;
+};
+const contentStyle: ContentStyleType  = {
+  margin: 0,
+  height: '60px',
+  color: '#000',
+  lineHeight: '60px',
+  textAlign: 'center',
+  backgroundColor: '#f1f1f1',
+  padding: 4,
+
+};
+
+const mobileContentStyle: ContentStyleType = {
+  ...contentStyle,
+  height: '10px',
+  lineHeight: '10px',
+};
 
 const items = [
   {
     label: 'Navigation One',
-    key: 'mail',
+    key: 'one',
     icon: <MailOutlined />,
   },
   {
     label: 'Navigation One',
-    key: 'mail',
+    key: 'two',
     icon: <MailOutlined />,
   },
   {
     label: 'Navigation One',
-    key: 'mail',
+    key: 'three',
     icon: <MailOutlined />,
   },
   {
     label: 'Navigation One',
-    key: 'mail',
+    key: 'four',
     icon: <MailOutlined />,
   },
 ];
@@ -123,8 +150,21 @@ const HeaderLayout  = () => {
       <Menu mode="horizontal" items={itemsCenter} />
       </div>
       <div className='row'>
+        <Carousel autoplay>
+        <div>
+          <h3 style={contentStyle}>BUY 2 GET 10% OFF - ÁP DỤNG VỚI TẤT CẢ BASIC TEE</h3>
+        </div>
+        <div>
+          <h3 style={contentStyle}>HÀNG 2 TUẦN NHẬN ĐỔI - GIÀY NỬA NĂM BẢO HÀNH</h3>
+        </div>
+        <div>
+          <h3 style={contentStyle}>FREE SHIPPING VỚI HOÁ ĐƠN TỪ 900K !</h3>
+        </div>
+        <div>
+          <h3 style={contentStyle}>BUY MORE PAY LESS - ÁP DỤNG KHI MUA PHỤ KIỆN</h3>
+        </div>
+      </Carousel>
       </div>
-   
     </Header>
 
   );

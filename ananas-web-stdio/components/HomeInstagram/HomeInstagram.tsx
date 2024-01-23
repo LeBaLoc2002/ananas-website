@@ -4,12 +4,10 @@ export default function HomeInstagram() {
   return (
     <div className="home-instagram container mx-auto p-4">
       <div className="flex flex-wrap">
-        {/* Instagram Section */}
         <div className="w-full md:w-1/2">
           <div className="text-3xl font-bold text-black text-center mb-8">INSTAGRAM</div>
         </div>
 
-        {/* News Section */}
         <div className="w-full md:w-1/2">
           <div className="text-3xl font-bold text-black text-center mb-8">TIN TỨC &amp; BÀI VIẾT</div>
           <div className="news-list">

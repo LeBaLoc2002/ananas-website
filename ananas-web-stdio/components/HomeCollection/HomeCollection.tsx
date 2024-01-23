@@ -1,8 +1,8 @@
-import React, { Component } from 'react'
+import React from 'react'
 
 const HomeCollection = () => {
     return (
-        <div className="container mx-auto mt-10">
+        <div className="container mx-auto mt-20 md:mt-20">
             <div className="flex flex-wrap">
             <div className="w-full md:w-1/2">
                 <div className="adv-collection">
