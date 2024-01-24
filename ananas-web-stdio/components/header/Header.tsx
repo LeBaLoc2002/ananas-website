@@ -146,12 +146,12 @@ const HeaderLayout  = () => {
 
       <div className="bg-white">
         <div className="container mx-auto flex items-center justify-center">
+          <div className='font-bold'>
+              <Button type="dashed" className='font-bold h-full mt-4' ><Link href="/MainContentShoe"  style={{fontSize:'15px'}}>Manager Shoe</Link></Button>
+          </div>
           <div className="w-12/12">
             <div className="flex items-center justify-center mx-auto font-bold">
-              <Menu mode="horizontal" className='italic' style={{fontSize:'23px'}} items={itemsCenter} />
-              <div>
-              <Button type="primary"><Link href="/MainContentShoe">Dashboard</Link></Button>
-              </div>
+              <Menu mode="horizontal" className='italic' style={{fontSize:'20px'}} items={itemsCenter} />
             </div>
           </div>
         </div>

@@ -15,7 +15,15 @@
     --background-end-rgb: 0, 0, 0;
   }
 }
+@layer components {
+  .lg\\:w-custom {
+    width: 24%;
+  }
 
+  .xl\\:w-custom {
+    width: 24%;
+  }
+}
 body {
   color: rgb(var(--foreground-rgb));
   background: linear-gradient(
@@ -100,4 +108,9 @@ label {
   height: 1px;
   width: 1px;
   overflow: hidden;
+}
+@media screen and (max-width: 500px){
+  .socialnetwork{
+    justify-content: center;
+  }
 }
