@@ -1,58 +1,40 @@
-import { Header } from 'antd/es/layout/layout'
-import React from 'react'
-import './HeaderShoe.scss'
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  BellOutlined,
-  UserOutlined
-} from '@ant-design/icons';
-import { Avatar, Button } from 'antd';
+import React from 'react';
+import { Button, Input, Avatar } from 'antd';
+import { MenuFoldOutlined, MenuUnfoldOutlined, BellOutlined, UserOutlined } from '@ant-design/icons';
+import { Header } from 'antd/es/layout/layout';
 
-interface props {
-  collapsed: boolean,
+interface Props {
+  collapsed: boolean;
   setCollapsed: (setCollapsed: boolean) => void;
 }
 
-
-
-export default function HeaderShoe({ setCollapsed, collapsed } : props) {
+export default function HeaderShoe({ setCollapsed, collapsed }: Props) {
   return (
-    <Header style={{ padding: 0 }} className='bg-emerald-400 flex w-full z-50 fixed header-shoe'>
-        <div className='flex'>
-        <Button
-          type="text"
-          icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-          onClick={() => setCollapsed(!collapsed)}
-          style={{
-            fontSize: '16px',
-            width: 64,
-            height: 64,
-          }}
+    <Header className='bg-white flex items-center p-4'>
+      <Button
+        type="text"
+        icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
+        onClick={() => setCollapsed(!collapsed)}
+      />
+
+      <div className='flex ml-auto mt-auto items-center sm:justify-between'>
+
+        <Input
+          placeholder="Tìm kiếm..."
+          className='flex-grow sm:w-32 md:w-40 lg:w-64 xl:w-80 md:mb-0 mr-4 text-sm left-3'
         />
+
+        <div className='flex items-center space-x-2'>
+          <Avatar className='hidden md:block'>
+            <BellOutlined />
+          </Avatar>
+
+          <Avatar className='hidden md:block'>
+            <UserOutlined />
+          </Avatar>
         </div>
-        <div className='row flex'>
-            <div className='col-start-1 col-end-3'>
-                <div className='row px-1	'>
-                  <h2>Manager Shoe</h2>
-                </div> 
-            </div>
-            <div className='flex col-end-7 col-span-2'>
-                <div className='row px-1 '>
-                <form role="search">
-                  <label >Search for stuff</label>
-                  <input id="search" type="search" placeholder="Search..."  required />
-                  <button type="submit">Go</button>    
-                </form>
-                </div> 
-                <div className='row px-1	'>
-                  <Avatar size="large" icon={<BellOutlined />} />
-                </div>    
-                <div className='row px-1'>
-                  <Avatar size="large" icon={<UserOutlined />} />
-                </div>  
-          </div>      
-        </div>
+
+      </div>
     </Header>
-  )
+  );
 }

@@ -1,53 +1,61 @@
-import { Menu } from 'antd'
-import Sider from 'antd/es/layout/Sider'
-import React from 'react'
+import { Menu } from 'antd';
+import Sider from 'antd/es/layout/Sider';
+import React from 'react';
 import {
   TagsOutlined,
   AppstoreAddOutlined,
   ShoppingCartOutlined,
   ShopOutlined,
-  StockOutlined
+  StockOutlined,
 } from '@ant-design/icons';
 
-interface props {
-  collapsed : boolean
+interface Props {
+  collapsed: boolean;
 }
-export default function SiderbarShoe({collapsed} : props) {
+
+export default function SiderbarShoe({ collapsed }: Props) {
   return (
-    <div className=''>
-      <Sider trigger={null} collapsible collapsed={collapsed} style={{backgroundColor:'#fff'}} className='bg-white h-full'>
+    <div>
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        style={{ backgroundColor: '#fff'}}
+        className={`bg-white h-full border-r transition-all duration-300 ease-in-out ${
+          collapsed ? 'w-20' : 'w-64'
+        } xs:max-w-36`}
+      >
+        <div className='flex items-center justify-center p-4'>
+          <img
+            src='https://avatars3.githubusercontent.com/u/12101536?s=400&v=4'
+            alt='Logo'
+            className='w-full max-w-[40px] md:max-w-[40px] xl:max-w-[40px] rounded-md'
+          />
+        </div>
+
         <Menu
           mode="inline"
           defaultSelectedKeys={['1']}
-          items={[
-            {
-              key: '1',
-              icon: <AppstoreAddOutlined />,
-              label: 'Dashboard',
-            },
-            {
-              key: '2',
-              icon: <ShoppingCartOutlined />,
-              label: 'Order',
-            },
-            {
-              key: '3',
-              icon: <ShopOutlined />,
-              label: 'Product',
-            },
-            {
-              key: '4',
-              icon: <StockOutlined />,
-              label: 'Stock',
-            },
-            {
-              key: '5',
-              icon: <TagsOutlined />,
-              label: 'Offer',
-            },
-          ]}
-        />
+          theme="light"
+          className='border-r-0'
+        >
+          <Menu.Item key='1' icon={<AppstoreAddOutlined />}>
+            Dashboard
+          </Menu.Item>
+          <Menu.Item key='2' icon={<ShoppingCartOutlined />}>
+            Order
+          </Menu.Item>
+          <Menu.Item key='3' icon={<ShopOutlined />}>
+            Product
+          </Menu.Item>
+          <Menu.Item key='4' icon={<StockOutlined />}>
+            Stock
+          </Menu.Item>
+          <Menu.Item key='5' icon={<TagsOutlined />}>
+            Offer
+          </Menu.Item>
+        </Menu>
       </Sider>
     </div>
-  )
+  );
 }

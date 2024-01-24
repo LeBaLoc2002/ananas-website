@@ -16,11 +16,11 @@ const Page: React.FC = () => {
   return (
     <Layout>
       <SiderbarShoe collapsed={collapsed}/>
-        <Layout className='rounded header-content'>
+        <Layout className='rounded'>
           <HeaderShoe collapsed={collapsed} setCollapsed={setCollapsed} />
           <Content
             style={{
-              margin: '100px 16px',
+              margin: '10px 16px',
               padding: 24,
               minHeight: 280,
               background: colorBgContainer,
