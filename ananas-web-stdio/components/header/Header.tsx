@@ -1,9 +1,10 @@
 import { Header } from 'antd/es/layout/layout';
 import React from 'react';
 import {CheckCircleOutlined , HeartOutlined , LoginOutlined, ShoppingCartOutlined , PictureOutlined , MoneyCollectOutlined} from '@ant-design/icons';
-import { Menu } from 'antd';
+import { Button, Menu } from 'antd';
 import './Header.scss'
 import { Carousel } from 'antd';
+import Link from 'next/link';
 const items = [
   {
     label: ' Tra cứu đơn hàng',
@@ -145,21 +146,12 @@ const HeaderLayout  = () => {
 
       <div className="bg-white">
         <div className="container mx-auto flex items-center justify-center">
-          {/* <div className="w-1/12">
-            <div className="navbar-brand">
-              <a href="https://ananas.vn">
-                <img
-                  src="https://ananas.vn/wp-content/themes/ananas/fe-assets/images/svg/Logo_Ananas_Header.svg"
-                  alt="Ananas Logo"
-                  className="mx-auto"
-                />
-              </a>
-            </div>
-          </div> */}
-
           <div className="w-12/12">
             <div className="flex items-center justify-center mx-auto font-bold">
               <Menu mode="horizontal" className='italic' style={{fontSize:'23px'}} items={itemsCenter} />
+              <div>
+              <Button type="primary"><Link href="/MainContentShoe">Dashboard</Link></Button>
+              </div>
             </div>
           </div>
         </div>

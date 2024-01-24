@@ -1,19 +1,19 @@
+"use client"
 import React from 'react';
 import { Layout } from "antd";
-import HeaderLayout from '@/components/header/Header';
 import MainContent from '@/components/mainContent/MainContent';
-import FooterLayout from '@/components/footer/Footer';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
 export default function Home() {
 
   return (
-    <Layout>
+    <Router>
       <Layout>
-        <HeaderLayout />
-        <MainContent />
-        <FooterLayout />
+        <Routes>
+          <Route path="/" element={<MainContent  />} />
+        </Routes>
       </Layout>
-    </Layout>
+    </Router>
   );
 }
 
