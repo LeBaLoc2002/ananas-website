@@ -1,9 +1,9 @@
 "use client"
 import React, { useState } from 'react';
 import { Layout, theme } from 'antd';
-import SiderbarShoe from '../SidebarShoe/SiderbarShoe';
-import HeaderShoe from '../HeaderShoe/HeaderShoe';
 import './MainContentShoe.scss'
+import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
+import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
 
 const {  Content } = Layout;
 

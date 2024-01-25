@@ -1,7 +1,7 @@
 import { Header } from 'antd/es/layout/layout';
 import React from 'react';
 import {CheckCircleOutlined , HeartOutlined , LoginOutlined, ShoppingCartOutlined , PictureOutlined , MoneyCollectOutlined} from '@ant-design/icons';
-import { Button, Menu } from 'antd';
+import { Menu } from 'antd';
 import './Header.scss'
 import { Carousel } from 'antd';
 import Link from 'next/link';
@@ -9,7 +9,6 @@ const items = [
   {
     label: ' Tra cứu đơn hàng',
     key: 'Lookorders',
-    icon: <CheckCircleOutlined   className="text-xs"/>,
   },
   {
     label: ' Yêu thích',
@@ -29,6 +28,10 @@ const items = [
 ];
 
 const itemsCenter = [
+  {
+    label: <Link href="/MainContentShoe"  style={{fontSize:'15px'}}>Manager Shoe</Link>,
+    key: 'managerShoe',
+  },
   {
     label: 'Nam',
     key: 'Male',
@@ -127,7 +130,6 @@ const itemsCenter = [
   {
     label: 'Sale Off',
     key: 'Sale',
-    icon: <MoneyCollectOutlined />,
   },
 ];
 
@@ -146,12 +148,9 @@ const HeaderLayout  = () => {
 
       <div className="bg-white">
         <div className="container mx-auto flex items-center justify-center">
-          <div className='font-bold'>
-              <Button type="dashed" className='font-bold h-full mt-4' ><Link href="/MainContentShoe"  style={{fontSize:'15px'}}>Manager Shoe</Link></Button>
-          </div>
           <div className="w-12/12">
             <div className="flex items-center justify-center mx-auto font-bold">
-              <Menu mode="horizontal" className='italic text-black' style={{fontSize:'20px'}} items={itemsCenter} />
+              <Menu mode="horizontal" className='italic text-black'  items={itemsCenter} />
             </div>
           </div>
         </div>
