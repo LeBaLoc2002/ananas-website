@@ -111,7 +111,7 @@ const FooterLayout = () => {
           <div className="flex items-center">
             <div className="col-3">
               <a href="http://online.gov.vn/Home/WebDetails/61921">
-                <img src="https://ananas.vn/wp-content/themes/ananas/fe-assets/images/icon_bocongthuong.png" alt="Bộ Công Thương" />
+                <img src="/ProjectImage/icon_bocongthuong_11zon.png" alt="Bộ Công Thương" />
               </a>
             </div>
             <div className="ml-2 text-sm col-9">

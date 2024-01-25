@@ -8,14 +8,14 @@ const HomeCollection = () => {
                     <div className="adv-collection h-80 lg:h-320 overflow-hidden mb-4 lg:mb-0">
                         <a href="/promotion/clearance-sale/">
                             <img
-                                src="https://ananas.vn/wp-content/uploads/banner-phu%CC%A3_2m-600x320.jpg"
+                                src="/ProjectImage/banner-phụ_2m-600x320.jpg"
                                 alt="Sale Banner"
                                 className="w-full h-full object-cover rounded-md shadow-md"
                             />
                         </a>
                     </div>
                     <div className="content-collection md:col-span-6">
-                        <h3 className="title text-2xl lg:text-3xl font-bold mb-2">
+                        <h3 className="title text-2xl lg:text-3xl font-bold mb-2 text-black">
                             <a href="/promotion/clearance-sale/">ALL BLACK IN BLACK</a>
                         </h3>
                         <p className="description text-base lg:text-lg text-gray-700">
@@ -28,14 +28,14 @@ const HomeCollection = () => {
                     <div className="adv-collection h-80 lg:h-320 overflow-hidden mb-4 lg:mb-0">
                         <a href="/promotion/clearance-sale/">
                             <img
-                                src="https://ananas.vn/wp-content/uploads/Banner_Sale-off-1.jpg"
+                                src="/ProjectImage/Banner_Sale-off-1_11zon.jpg"
                                 alt="Sale Banner"
                                 className="w-full h-full object-cover rounded-md shadow-md"
                             />
                         </a>
                     </div>
                     <div className="content-collection md:col-span-6">
-                        <h3 className="title text-2xl lg:text-3xl font-bold mb-2">
+                        <h3 className="title text-2xl lg:text-3xl font-bold mb-2 text-black	">
                             <a href="/promotion/clearance-sale/">OUTLET SALE</a>
                         </h3>
                         <p className="description text-base lg:text-lg text-gray-700">

@@ -151,7 +151,7 @@ const HeaderLayout  = () => {
           </div>
           <div className="w-12/12">
             <div className="flex items-center justify-center mx-auto font-bold">
-              <Menu mode="horizontal" className='italic' style={{fontSize:'20px'}} items={itemsCenter} />
+              <Menu mode="horizontal" className='italic text-black' style={{fontSize:'20px'}} items={itemsCenter} />
             </div>
           </div>
         </div>

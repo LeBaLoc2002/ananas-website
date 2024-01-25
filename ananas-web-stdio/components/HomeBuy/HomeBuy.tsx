@@ -4,7 +4,7 @@ const HomeBuy = () => {
   const categories = [
     {
       title: 'GIÀY NAM',
-      imageUrl: 'https://ananas.vn/wp-content/uploads/catalogy-1.jpg',
+      imageUrl: '/ProjectImage/catalogy-1_11zon.jpg',
       links: [
         { label: 'New Arrivals', url: '/product-list?gender=men&category=shoes&attribute=new-arrival' },
         { label: 'Best Seller', url: '/product-list?gender=men&category=shoes&attribute=best-seller' },
@@ -13,7 +13,7 @@ const HomeBuy = () => {
     },
     {
       title: 'GIÀY NỮ',
-      imageUrl: 'https://ananas.vn/wp-content/uploads/catalogy-2.jpg',
+      imageUrl: '/ProjectImage/catalogy-2_11zon.jpg',
       links: [
         { label: 'New Arrivals', url: '/product-list?gender=women&category=shoes&attribute=new-arrival' },
         { label: 'Best Seller', url: '/product-list?gender=women&category=shoes&attribute=best-seller' },
@@ -22,7 +22,7 @@ const HomeBuy = () => {
     },
     {
       title: 'DÒNG SẢN PHẨM',
-      imageUrl: 'https://ananas.vn/wp-content/uploads/catalogy-3.jpg',
+      imageUrl: '/ProjectImage/catalogy-3_11zon.jpg',
       links: [
         { label: 'Basas', url: '/product-list?gender=&category=&attribute=basas' },
         { label: 'Vintas', url: '/product-list?gender=&category=&attribute=vintas' },
@@ -34,7 +34,7 @@ const HomeBuy = () => {
 
   return (
     <div className="home-buy container mx-auto sm:px-4 md:px-6 lg:px-8 p-16	">
-      <div className="text-3xl font-bold mb-4 text-center">DANH MỤC MUA HÀNG</div>
+      <div className="text-3xl font-bold mb-4 text-center text-black">DANH MỤC MUA HÀNG</div>
       <div className="flex flex-wrap justify-center	">
         {categories.map((category, index) => (
           <div key={index} className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 xl:w-1/4 p-2 ">

@@ -1,5 +1,6 @@
 import { Carousel } from 'antd';
 import React from 'react';
+import Image from 'next/image'
 
 export default function SlideBanner() {
   return (
@@ -21,7 +22,7 @@ export default function SlideBanner() {
           <a href="https://ananas.vn/product-list?gender=&amp;category=&amp;attribute=tom" className="inline-block">
             <div className="cont-item">
               <img
-                src="https://ananas.vn/wp-content/uploads/Hi-im-Mule_1920x1050-Desktop.jpg"
+                src="/ProjectImage/Hi-im-Mule_1920x1050-Desktop_11zon.jpg"
                 alt="Ananas Product"
                 className="w-full max-w-2xl object-cover sm:h-screen md:h-730 lg:h-screen xl:h-730"
                 style={{ maxHeight: '85vh', width: '100vw', maxWidth: '1920px', objectFit: 'cover' }}

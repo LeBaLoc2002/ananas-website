@@ -8,7 +8,6 @@ import {
   ShopOutlined,
   StockOutlined,
 } from '@ant-design/icons';
-
 interface Props {
   collapsed: boolean;
 }
@@ -27,7 +26,7 @@ export default function SiderbarShoe({ collapsed }: Props) {
       >
         <div className='flex items-center justify-center p-4'>
           <img
-            src='https://avatars3.githubusercontent.com/u/12101536?s=400&v=4'
+            src='/ProjectImage/12101536_11zon.png'
             alt='Logo'
             className='w-full max-w-[40px] md:max-w-[40px] xl:max-w-[40px] rounded-md'
           />
