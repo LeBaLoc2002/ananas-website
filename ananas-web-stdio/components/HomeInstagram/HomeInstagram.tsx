@@ -1,3 +1,4 @@
+import { Button } from 'antd';
 import React from 'react';
 
 export default function HomeInstagram() {
@@ -35,7 +36,9 @@ export default function HomeInstagram() {
       </div>
 
       <div className="text-center mt-4">
-        <a id="btnMoreInsNews" className="btn btn-load-more bg-blue-500 text-white py-2 px-4 rounded-full">MUỐN XEM NỮA</a>
+        <Button  className='bg-slate-900	text-gray-300	font-bold' size={'large'}>
+            MUỐN XEM NỮA
+        </Button>
       </div>
     </div>
   );
