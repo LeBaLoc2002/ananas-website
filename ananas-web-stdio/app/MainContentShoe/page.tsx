@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Button, Divider, Layout, Table, TableColumnsType, theme } from 'antd';
+import { Button, Divider, Layout, Table, TableColumnsType, Tag, theme } from 'antd';
 import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
@@ -37,6 +37,21 @@ const Page: React.FC = () => {
     {
       title: 'Size',
       dataIndex: 'Size',
+      render: (Size: string[]) => (
+        <span>
+        {Size.map((tag) => {
+          let color = tag.length > 5 ? 'geekblue' : 'green';
+          if (tag === 'loser') {
+            color = 'volcano';
+          }
+          return (
+            <Tag color={color} key={tag}>
+              {tag.toUpperCase()}
+            </Tag>
+          );
+        })}
+      </span>
+      ),
     },
     {
       title: 'Image URL',
@@ -61,6 +76,8 @@ const Page: React.FC = () => {
       try{
         const querySnapshot = await getDocs(collection(db, 'shoes'))
         const newData = await querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        console.log(newData);
+        
         dispatch(setShoe(newData))
         return newData
       }catch(error) {
@@ -92,8 +109,8 @@ const Page: React.FC = () => {
             borderRadius: borderRadiusLG,
           }}
         >
-          <Divider>Product Table</Divider>
           <Table
+            title={() => <p className='font-bold font-black'>Manager shoes</p>}
             columns={columns}
             dataSource={shoeData}
             size="small"
