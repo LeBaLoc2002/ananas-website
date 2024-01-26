@@ -21,7 +21,6 @@ const MainContent = () => {
         </Content>
       <FooterLayout/>
     </Layout>
-    
   );
 };
 

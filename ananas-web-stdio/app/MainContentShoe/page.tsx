@@ -1,13 +1,21 @@
 "use client"
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Divider, Layout, Table, TableColumnsType, theme } from 'antd';
 import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
+import { QueryClient, useQuery } from '@tanstack/react-query';
+import { collection, getDocs } from 'firebase/firestore';
+import { useDispatch } from 'react-redux';
+import { setShoe } from '@/src/features/shoeSlice';
+import { db } from '@/src/firebase';
+import { toast } from 'react-toastify';
 
 const { Content } = Layout;
 
 const Page: React.FC = () => {
+  const queryClient = new QueryClient()
+  const dispatch = useDispatch()
   const [collapsed, setCollapsed] = useState(false);
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -16,19 +24,19 @@ const Page: React.FC = () => {
   const columns: TableColumnsType<any> = [
     {
       title: 'Name',
-      dataIndex: 'name',
+      dataIndex: 'Name',
     },
     {
       title: 'Price',
-      dataIndex: 'price',
+      dataIndex: 'Price',
     },
     {
       title: 'Product Code',
-      dataIndex: 'productCode',
+      dataIndex: 'ProductCode',
     },
     {
       title: 'Size',
-      dataIndex: 'size',
+      dataIndex: 'Size',
     },
     {
       title: 'Image URL',
@@ -47,29 +55,33 @@ const Page: React.FC = () => {
     },
   ];
 
-  const dummyData = [
-    {
-      key: '1',
-      name: 'Sample Product 1',
-      price: 50,
-      productCode: 'ABC123',
-      size: 'M',
-      imageURL: 'https://avatars3.githubusercontent.com/u/12101536?s=400&v=4',
-    },
-    {
-      key: '2',
-      name: 'Sample Product 2',
-      price: 60,
-      productCode: 'XYZ789',
-      size: 'L',
-      imageURL: 'https://avatars3.githubusercontent.com/u/12101536?s=400&v=4',
-    },
-  ];
+  const {data: shoeData, isError, isLoading } = useQuery({
+    queryKey: ['shoes'],  
+    queryFn: async () => {
+      try{
+        const querySnapshot = await getDocs(collection(db, 'shoes'))
+        const newData = await querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
+        dispatch(setShoe(newData))
+        return newData
+      }catch(error) {
+        toast.error( 'Error',{
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+          });  
+      }
+    }
+  })
+
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: ['shoes'] })
+  })
 
   return (
-    <Layout>
+    <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
       <SiderbarShoe collapsed={collapsed} />
-      <Layout className='rounded'>
+      <Layout className='rounded p-5 bg-teal-100 md:m-4'  style={{borderRadius: '50px'}}>
         <HeaderShoe collapsed={collapsed} setCollapsed={setCollapsed} />
         <Content
           style={{
@@ -83,7 +95,7 @@ const Page: React.FC = () => {
           <Divider>Product Table</Divider>
           <Table
             columns={columns}
-            dataSource={dummyData}
+            dataSource={shoeData}
             size="small"
             scroll={{ x: true }}
             pagination={false}
