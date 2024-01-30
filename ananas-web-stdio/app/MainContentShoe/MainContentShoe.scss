@@ -3,8 +3,36 @@
     padding: 2rem;
     background-color: rgb(200 239 244 / 50%);
 }
-@media only screen and (max-width: 768px) {
+@media(max-width: 768px) {
     .sm-max-w-64 {
-      max-width: 64px;
+      max-width: 100px;
     }
+    .inputSelect{
+      max-width: 45vh;
+    }
+}
+
+@media (min-width:  767px) {
+  .sm-max-w-64 {
+    max-width: 100%;
   }
+  .inputSelect{
+    max-width: 100%;
+  }
+}
+.row-header-top{
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding: 10px;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+
+}
+.row-header-bottom{
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  padding: 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}

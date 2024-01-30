@@ -10,7 +10,7 @@ interface Props {
 
 export default function HeaderShoe({ setCollapsed, collapsed }: Props) {
   return (
-    <Header className='bg-teal-100 flex items-center p-4'>
+    <Header className='bg-cyan-100 flex items-center p-4'>
       <Button
         type="text"
         icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}

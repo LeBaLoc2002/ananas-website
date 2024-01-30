@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, InputNumber, Layout, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
+import { Button, Col, ColorPicker, Dropdown, Form, Input, InputNumber, Layout, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
 import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { deleteShoe, setShoe } from '@/src/features/shoeSlice';
 import { db, storage } from '@/src/firebase';
 import { toast } from 'react-toastify';
+import Select from 'react-select';
 import { UploadOutlined } from '@ant-design/icons';
 import { deleteObject, ref } from 'firebase/storage';
 
@@ -19,7 +20,7 @@ const { Content } = Layout;
 const Page: React.FC = () => {
   const queryClient = new QueryClient()
   const dispatch = useDispatch()
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -73,6 +74,32 @@ const Page: React.FC = () => {
     },
   ];
 
+  const headersTable = [
+    {
+      title: '#2539',
+      dataIndex: 'id',
+    },
+    {
+      title: 'Jordan Smith',
+      dataIndex: 'Name',
+    }, 
+    {
+      title: '31 July 2020',
+      dataIndex: 'Day',
+    }, 
+    {
+      title: '$200',
+      dataIndex: 'Price',
+    },
+    {
+      title: 'Jordan Smith',
+      dataIndex: 'Name',
+      render: (title: string[]) => (
+        <ColorPicker defaultValue="#1677ff" />
+      )
+    }
+  ]
+
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
@@ -96,22 +123,22 @@ const Page: React.FC = () => {
     }
   })
 
-    const handleDelete = async (id: string, imageURL: string) => {
-      try {
-        await deleteDoc(doc(db, 'shoes', id));
-        if (imageURL) {
-          console.log(imageURL);
-          const storageRef = ref(storage, imageURL);
-          console.log(storageRef);
-          await deleteObject(storageRef);
-        }
-        dispatch(deleteShoe(id));
-        refetch();
-        queryClient.invalidateQueries({ queryKey: ['shoes'] })
-      } catch (error) {
-        console.error('Error deleting document: ', error);
+  const handleDelete = async (id: string, imageURL: string) => {
+    try {
+      await deleteDoc(doc(db, 'shoes', id));
+      if (imageURL) {
+        console.log(imageURL);
+        const storageRef = ref(storage, imageURL);
+        console.log(storageRef);
+        await deleteObject(storageRef);
       }
-    };
+      dispatch(deleteShoe(id));
+      refetch();
+      queryClient.invalidateQueries({ queryKey: ['shoes'] })
+    } catch (error) {
+      console.error('Error deleting document: ', error);
+    }
+  };
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ['shoes'] })
@@ -143,119 +170,155 @@ const Page: React.FC = () => {
         message.error(`${info.file.name} file upload failed.`);
       }
     };
-    
-  return (
-    <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
-      <SiderbarShoe collapsed={collapsed} />
-      <Layout className='rounded p-5 bg-teal-100 md:m-4'  style={{borderRadius: '50px'}}>
-        <HeaderShoe collapsed={collapsed} setCollapsed={setCollapsed} />
-        <Content
-          style={{
-            margin: '10px 16px',
-            padding: 24,
-            minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-          }}
-        >
 
-          <Table
-            title={() => 
-            <div className='flex justify-between items-center'>
-              <p className='font-bold font-black'>Manager shoes</p>
-              <div className='flex justify-end '>
-                <Button type="primary" size={'middle'} onClick={showModalCreate}>
-                  Create
-                </Button>
+    const colourOptions = [
+      { value: 'ocean', label: 'Ocean', color: '#00B8D9'},
+      { value: 'blue', label: 'Blue', color: '#0052CC' },
+      { value: 'purple', label: 'Purple', color: '#5243AA' },
+      { value: 'red', label: 'Red', color: '#FF5630'},
+      { value: 'orange', label: 'Orange', color: '#FF8B00' },
+      { value: 'yellow', label: 'Yellow', color: '#FFC400' },
+      { value: 'green', label: 'Green', color: '#36B37E' },
+      { value: 'forest', label: 'Forest', color: '#00875A' },
+      { value: 'slate', label: 'Slate', color: '#253858' },
+      { value: 'silver', label: 'Silver', color: '#666666' },
+    ];
+    const style: React.CSSProperties = {  padding: '8px 0', textAlign: 'center' , color:'black'};
+
+    return (
+      <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
+        <SiderbarShoe collapsed={collapsed} />
+        <Layout className='rounded p-5 bg-cyan-100 md:m-4'  style={{borderRadius: '50px'}}>
+          <HeaderShoe collapsed={collapsed} setCollapsed={setCollapsed} />
+          <Content
+            style={{
+              margin: '10px 16px',
+              padding: 24,
+              minHeight: 280,
+              borderRadius: borderRadiusLG,
+            }}
+            className='bg-cyan-100'
+          >
+           <Row className='row-header'>
+            <Col span={12}>
+              <h2>
+                Pickup 1 
+              </h2>
+              <p>
+                24 orders - 09:00 AM
+              </p>
+            </Col>
+            <Col span={12} >
+            <Dropdown.Button className='justify-end'>Pickup</Dropdown.Button>
+            </Col>
+          </Row>
+
+          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} style={{backgroundColor: '#b5e3afa9'}} className='row-header-top'>
+            <Col className="gutter-row" span={6}>
+              <div className='font-black' style={style}>#fff</div>
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <div className='font-black' style={style}>B</div>
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <div className='font-black' style={style}>30 Jan 2024</div>
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <div className='font-black'  style={style}>40$</div>
+            </Col>
+          </Row>
+           <Table
+              title={() => 
+              <div className='flex justify-between items-center'>
+                <p className='font-black size-3	'>Manager shoes</p>
+                <div className='flex justify-end'>
+                  <Button type="default" size={'middle'} onClick={showModalCreate}>
+                    Create
+                  </Button>
+                </div>
               </div>
-            </div>
-            }
-            columns={columns}
-            dataSource={shoeData}
-            size="small"
-            scroll={{ x: true }}
-            pagination={false}
-            bordered 
-            className='text-center'
-          />
-        </Content>
-        <Modal
-          title="Title"
-          open={open}
-          onOk={handleOk}
-          confirmLoading={confirmLoading}
-          onCancel={handleCancel}
-        >
-          <Form>
-          <Form.Item
-            name={['user', 'name']}
-            label="Name"
-            rules={[
-              {
-                required: true,
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name={['user', 'email']}
-            label="Email"
-            rules={[
-              {
-                type: 'email',
-              },
-            ]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            name={['user', 'age']}
-            label="Age"
-            rules={[
-              {
-                type: 'number',
-                min: 0,
-                max: 99,
-              },
-            ]}
-          >
-            <InputNumber />
-          </Form.Item>
-          <Form.Item name={['user', 'website']} label="Website" className='text-black'>
-            <Input/>
-          </Form.Item>
-          <Form.Item
-            name="image"
-            label="Image"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => e.fileList}
-            rules={[{ required: true, message: 'Please upload an image!' }]}
-            className='sm:max-w-64 fieldImage text-black'
-          >
-            <Upload
-              name="image"
-              listType="picture"
-              fileList={fileList}
-              onChange={(info) => {
-                setFileList(info.fileList);
-                handleFileChange(info);
-                        }}
-                >
-              <Button icon={<UploadOutlined />}>Upload Image</Button>
-            </Upload>
-          </Form.Item>
+              }
+              columns={columns}
+              dataSource={shoeData}
+              size="small"
+              scroll={{ x: true }}
+              pagination={false}
+              bordered 
+              className='text-center'
+            />
+            <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} style={{backgroundColor: '#fff'}} className='row-header-bottom'>
+            <Col className="gutter-row" span={6}>
+              <div className='font-black' style={style}>#fff</div>
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <div className='font-black' style={style}>B</div>
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <div className='font-black' style={style}>30 Jan 2024</div>
+            </Col>
+            <Col className="gutter-row" span={6}>
+              <div className='font-black'  style={style}>40$</div>
+            </Col>
+          </Row>
+          </Content>
 
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-        </Modal>
+          <Modal
+            title="Title"
+            open={open}
+            onOk={handleOk}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            width={1000}
+          >
+            <Form>
+            <Form.Item name="note">
+            <Input />
+            </Form.Item>
+            <Form.Item>
+              <Input />
+            </Form.Item>
+            <Form.Item
+              label="Product Code"
+            >
+              <InputNumber />
+            </Form.Item>
+            <Form.Item 
+            className='sm:max-w-64 inputSelect'>
+            <Select
+              defaultValue={[colourOptions[2], colourOptions[3]]}
+              isMulti
+              name="colors"
+              options={colourOptions}
+              className="basic-multi-select "
+              classNamePrefix="select"
+            />
+            </Form.Item>
+
+            <Form.Item
+              name="image"
+              label="Image"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e.fileList}
+              rules={[{ required: true, message: 'Please upload an image!' }]}
+              className='sm:max-w-64 fieldImage text-black mt-2'
+            >
+              <Upload
+                name="image"
+                listType="picture"
+                fileList={fileList}
+                onChange={(info) => {
+                  setFileList(info.fileList);
+                  handleFileChange(info);
+                  }}
+                  >
+                <Button icon={<UploadOutlined />}>Upload Image</Button>
+              </Upload>
+            </Form.Item>
+          </Form>
+          </Modal>
+        </Layout>
       </Layout>
-    </Layout>
-  );
+    );
 };
 
 export default Page;
