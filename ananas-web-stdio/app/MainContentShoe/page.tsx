@@ -241,7 +241,7 @@ const Page: React.FC = () => {
               columns={columns}
               dataSource={shoeData}
               size="small"
-              scroll={{ x: true }}
+              scroll={{ x: 1000, y: 300 }} 
               pagination={false}
               bordered 
               className='text-center'
