@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Button, Col, ColorPicker, Dropdown, Form, Input, InputNumber, Layout, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
+import { Button, Col, ColorPicker, Dropdown, Form, Input, InputNumber, Layout, Menu, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
 import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
@@ -11,7 +11,7 @@ import { deleteShoe, setShoe } from '@/src/features/shoeSlice';
 import { db, storage } from '@/src/firebase';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined, HeartOutlined, LoginOutlined, ShoppingCartOutlined } from '@ant-design/icons';
 import { deleteObject, ref } from 'firebase/storage';
 
 
@@ -73,32 +73,6 @@ const Page: React.FC = () => {
         ),
     },
   ];
-
-  const headersTable = [
-    {
-      title: '#2539',
-      dataIndex: 'id',
-    },
-    {
-      title: 'Jordan Smith',
-      dataIndex: 'Name',
-    }, 
-    {
-      title: '31 July 2020',
-      dataIndex: 'Day',
-    }, 
-    {
-      title: '$200',
-      dataIndex: 'Price',
-    },
-    {
-      title: 'Jordan Smith',
-      dataIndex: 'Name',
-      render: (title: string[]) => (
-        <ColorPicker defaultValue="#1677ff" />
-      )
-    }
-  ]
 
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
@@ -199,67 +173,65 @@ const Page: React.FC = () => {
             }}
             className='bg-cyan-100'
           >
-           <Row className='row-header'>
-            <Col span={12}>
-              <h2>
-                Pickup 1 
-              </h2>
-              <p>
-                24 orders - 09:00 AM
-              </p>
-            </Col>
-            <Col span={12} >
-            <Dropdown.Button className='justify-end'>Pickup</Dropdown.Button>
-            </Col>
-          </Row>
+              <Menu mode="horizontal" className='menuOne'>
+                <Menu.Item key="Pickup">
+                <h2>Pickup 1</h2>
+                    <p>24 orders - 09:00 AM</p>
+                </Menu.Item>
+                <Menu.Item key="itemPickup" style={{ marginLeft: 'auto', justifyContent: 'center' }} className='itemPickup  mt-7'>
+                <Dropdown.Button className='justify-end mt-7	'>Pickup</Dropdown.Button>
+                </Menu.Item>
+              </Menu>
+              <Menu mode="horizontal" className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
+                <Menu.Item key="fff">
+                  <div className="font-black">#fff</div>
+                </Menu.Item>
+                <Menu.Item key="b">
+                  <div className="font-black">B</div>
+                </Menu.Item>
+                <Menu.Item key="30">
+                  <div className="font-black">30 Jan 2024</div>
+                </Menu.Item>
+                <Menu.Item key="40">
+                  <div className="font-black">40$</div>
+                </Menu.Item>
+              </Menu>
+              <Table
+                title={() => (
+                  <div className='flex justify-between items-center'>
+                    <p className='font-black size-1 hidden md:block'>Manager shoes</p>
+                    <div className='flex justify-end items-center'>
+                      <div className='md:order-2'>
+                        <Button type="default" size={'middle'} onClick={showModalCreate}>
+                          Create
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                columns={columns}
+                dataSource={shoeData}
+                size="small"
+                scroll={{ x: 700, y: 300 }} 
+                pagination={false}
+                bordered 
+                className='text-center'
+              />
 
-          <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} style={{backgroundColor: '#b5e3afa9'}} className='row-header-top'>
-            <Col className="gutter-row" span={6}>
-              <div className='font-black' style={style}>#fff</div>
-            </Col>
-            <Col className="gutter-row" span={6}>
-              <div className='font-black' style={style}>B</div>
-            </Col>
-            <Col className="gutter-row" span={6}>
-              <div className='font-black' style={style}>30 Jan 2024</div>
-            </Col>
-            <Col className="gutter-row" span={6}>
-              <div className='font-black'  style={style}>40$</div>
-            </Col>
-          </Row>
-           <Table
-              title={() => 
-              <div className='flex justify-between items-center'>
-                <p className='font-black size-3	'>Manager shoes</p>
-                <div className='flex justify-end'>
-                  <Button type="default" size={'middle'} onClick={showModalCreate}>
-                    Create
-                  </Button>
-                </div>
-              </div>
-              }
-              columns={columns}
-              dataSource={shoeData}
-              size="small"
-              scroll={{ x: 1000, y: 300 }} 
-              pagination={false}
-              bordered 
-              className='text-center'
-            />
-            <Row gutter={{ xs: 8, sm: 16, md: 24, lg: 32 }} style={{backgroundColor: '#fff'}} className='row-header-bottom'>
-            <Col className="gutter-row" span={6}>
-              <div className='font-black' style={style}>#fff</div>
-            </Col>
-            <Col className="gutter-row" span={6}>
-              <div className='font-black' style={style}>B</div>
-            </Col>
-            <Col className="gutter-row" span={6}>
-              <div className='font-black' style={style}>30 Jan 2024</div>
-            </Col>
-            <Col className="gutter-row" span={6}>
-              <div className='font-black'  style={style}>40$</div>
-            </Col>
-          </Row>
+             <Menu mode="horizontal" className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
+                <Menu.Item key="fff">
+                  <div className="font-black">#fff</div>
+                </Menu.Item>
+                <Menu.Item key="b">
+                  <div className="font-black">B</div>
+                </Menu.Item>
+                <Menu.Item key="30">
+                  <div className="font-black">30 Jan 2024</div>
+                </Menu.Item>
+                <Menu.Item key="40">
+                  <div className="font-black">40$</div>
+                </Menu.Item>
+              </Menu>
           </Content>
 
           <Modal
