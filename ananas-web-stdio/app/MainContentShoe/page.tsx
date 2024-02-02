@@ -5,14 +5,17 @@ import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import { collection, deleteDoc, doc, getDocs } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { useDispatch } from 'react-redux';
 import { deleteShoe, setShoe } from '@/src/features/shoeSlice';
 import { db, storage } from '@/src/firebase';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
 import { UploadOutlined, HeartOutlined, LoginOutlined, ShoppingCartOutlined } from '@ant-design/icons';
-import { deleteObject, ref } from 'firebase/storage';
+import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
+import * as Yup from 'yup';
+import { useFormik } from 'formik';
+import { v4 as uuidv4 } from 'uuid';
 
 
 const { Content } = Layout;
@@ -77,6 +80,8 @@ const Page: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [openUpdate, setOpenUpdate] = useState(false);
 
   const {data: shoeData, isError, isLoading , refetch  } = useQuery({
     queryKey: ['shoes'],  
@@ -118,23 +123,13 @@ const Page: React.FC = () => {
     queryClient.invalidateQueries({ queryKey: ['shoes'] })
   })
 
-    const handleOk = () => {
-      setConfirmLoading(true);
-      setTimeout(() => {
-        setOpen(false);
-        setConfirmLoading(false);
-      }, 2000);
-    };
-    const handleCancel = () => {
-      setOpen(false);
-    };
 
     const showModalUpdate = (id : any) => {
-      setOpen(true);
+      setOpenUpdate(true);
     };
 
     const showModalCreate = () => {
-      setOpen(true);
+      setOpenCreate(true);
     };
 
     const handleFileChange = (info: any) => {
@@ -145,19 +140,7 @@ const Page: React.FC = () => {
       }
     };
 
-    const colourOptions = [
-      { value: 'ocean', label: 'Ocean', color: '#00B8D9'},
-      { value: 'blue', label: 'Blue', color: '#0052CC' },
-      { value: 'purple', label: 'Purple', color: '#5243AA' },
-      { value: 'red', label: 'Red', color: '#FF5630'},
-      { value: 'orange', label: 'Orange', color: '#FF8B00' },
-      { value: 'yellow', label: 'Yellow', color: '#FFC400' },
-      { value: 'green', label: 'Green', color: '#36B37E' },
-      { value: 'forest', label: 'Forest', color: '#00875A' },
-      { value: 'slate', label: 'Slate', color: '#253858' },
-      { value: 'silver', label: 'Silver', color: '#666666' },
-    ];
-    const style: React.CSSProperties = {  padding: '8px 0', textAlign: 'center' , color:'black'};
+    const sizeOptions = Array.from({ length: 9 }, (_, index) => ({ value: `${37 + index}`, label: `${37 + index}` }));
 
     return (
       <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
@@ -233,39 +216,37 @@ const Page: React.FC = () => {
                 </Menu.Item>
               </Menu>
           </Content>
-
           <Modal
-            title="Title"
-            open={open}
-            onOk={handleOk}
-            confirmLoading={confirmLoading}
-            onCancel={handleCancel}
-            width={1000}
-          >
-            <Form>
-            <Form.Item name="note">
-            <Input />
+          title="Add shoe"
+          visible={openCreate}
+          confirmLoading={confirmLoading}
+          onCancel={() => {
+            setOpenCreate(false);
+          }}
+          width={1000}
+        >
+          <Form >
+            <Form.Item name="name" label="Name">
+              <Input />
             </Form.Item>
-            <Form.Item>
+            <Form.Item name="price" label="Price">
+              <InputNumber />
+            </Form.Item>
+            <Form.Item name="productCode" label="Product Code">
               <Input />
             </Form.Item>
             <Form.Item
-              label="Product Code"
+              name="size"
+              label="Size"
             >
-              <InputNumber />
+              <Select
+                options={sizeOptions}
+                isMulti
+                name="size"
+                className="basic-multi-select"
+                classNamePrefix="select"
+              />
             </Form.Item>
-            <Form.Item 
-            className='sm:max-w-64 inputSelect'>
-            <Select
-              defaultValue={[colourOptions[2], colourOptions[3]]}
-              isMulti
-              name="colors"
-              options={colourOptions}
-              className="basic-multi-select "
-              classNamePrefix="select"
-            />
-            </Form.Item>
-
             <Form.Item
               name="image"
               label="Image"
@@ -281,13 +262,76 @@ const Page: React.FC = () => {
                 onChange={(info) => {
                   setFileList(info.fileList);
                   handleFileChange(info);
-                  }}
-                  >
+                }}
+              >
                 <Button icon={<UploadOutlined />}>Upload Image</Button>
               </Upload>
             </Form.Item>
+            <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            </Form.Item>
           </Form>
-          </Modal>
+         </Modal>
+        <Modal
+          title="Update Shoe"
+          visible={openUpdate}
+          confirmLoading={confirmLoading}
+          onCancel={() => {
+            setOpenUpdate(false);
+          }}
+          width={1000}
+        >
+          <Form>
+            <Form.Item name="note" label="Name">
+              <Input />
+            </Form.Item>
+            <Form.Item name="price" label="Price">
+              <InputNumber />
+            </Form.Item>
+            <Form.Item name="productCode" label="Product Code">
+              <Input />
+            </Form.Item>
+            <Form.Item
+              name="size"
+              label="Size"
+            >
+              <Select
+                options={sizeOptions}
+                isMulti
+                name="size"
+                className="basic-multi-select"
+                classNamePrefix="select"
+              />
+            </Form.Item>
+            <Form.Item
+              name="image"
+              label="Image"
+              valuePropName="fileList"
+              getValueFromEvent={(e) => e.fileList}
+              rules={[{ required: true, message: 'Please upload an image!' }]}
+              className='sm:max-w-64 fieldImage text-black mt-2'
+            >
+              <Upload
+                name="image"
+                listType="picture"
+                fileList={fileList}
+                onChange={(info) => {
+                  setFileList(info.fileList);
+                  handleFileChange(info);
+                }}
+              >
+                <Button icon={<UploadOutlined />}>Upload Image</Button>
+              </Upload>
+            </Form.Item>
+            <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+            </Form.Item>
+          </Form>
+        </Modal>  
         </Layout>
       </Layout>
     );
