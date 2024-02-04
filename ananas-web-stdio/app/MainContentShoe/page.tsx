@@ -17,7 +17,6 @@ import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import { v4 as uuidv4 } from 'uuid';
 
-
 const { Content } = Layout;
 
 const Page: React.FC = () => {
@@ -76,14 +75,14 @@ const Page: React.FC = () => {
         ),
     },
   ];
-
-  const [open, setOpen] = useState(false);
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
+  const [selectedShoeId, setSelectedShoeId] = useState<string | null>(null);
 
-  const {data: shoeData, isError, isLoading , refetch  } = useQuery({
+
+  const {data: shoeData = [], isError, isLoading , refetch  } = useQuery({
     queryKey: ['shoes'],  
     queryFn: async () => {
       try{
@@ -104,44 +103,154 @@ const Page: React.FC = () => {
 
   const handleDelete = async (id: string, imageURL: string) => {
     try {
+      console.log('Deleting document with ID:', id);
       await deleteDoc(doc(db, 'shoes', id));
+  
       if (imageURL) {
-        console.log(imageURL);
+        console.log('Deleting image at URL:', imageURL);
         const storageRef = ref(storage, imageURL);
-        console.log(storageRef);
         await deleteObject(storageRef);
       }
-      dispatch(deleteShoe(id));
-      refetch();
-      queryClient.invalidateQueries({ queryKey: ['shoes'] })
+  
     } catch (error) {
       console.error('Error deleting document: ', error);
     }
   };
+  
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ['shoes'] })
   })
 
 
-    const showModalUpdate = (id : any) => {
-      setOpenUpdate(true);
-    };
+  const showModalUpdate = (id: any) => {
+    setSelectedShoeId(id);
+    setOpenUpdate(true);
+  };
 
+  
     const showModalCreate = () => {
       setOpenCreate(true);
     };
 
     const handleFileChange = (info: any) => {
+      console.log('File change info:', info);
+  
       if (info.file.status === 'done') {
-        message.success(`${info.file.name} file uploaded successfully`);
+          message.success(`${info.file.name} file uploaded successfully`);
       } else if (info.file.status === 'error') {
-        message.error(`${info.file.name} file upload failed.`);
+          message.error(`${info.file.name} file upload failed.`);
       }
     };
+  
+    
 
     const sizeOptions = Array.from({ length: 9 }, (_, index) => ({ value: `${37 + index}`, label: `${37 + index}` }));
-
+    const formik = useFormik({
+      initialValues: {
+        id: '',
+        Name: '',
+        Price: 0,
+        ProductCode: '',
+        Size: [''],
+        imageURL:'',
+      },
+      onSubmit: () => {}, 
+      validationSchema: Yup.object().shape({
+        name: Yup.string().required('Name is required'),
+        price: Yup.number().required('Price is required'),
+        productCode: Yup.string().required('Product Code is required'),
+        size: Yup.array().min(1, 'Please select at least one size'),
+      }),
+    });
+    const handleCreate = async () => {
+      try {
+        await formik.validateForm();
+    
+        const file = fileList[0].originFileObj;
+        
+        const storageRef = ref(storage, `shoes/${uuidv4()}-${file.name}`);
+        const uploadTask = uploadBytesResumable(storageRef, file);
+        await uploadTask;
+    
+        const imageURL = await getDownloadURL(storageRef);
+    
+        const newShoe = {
+          id: uuidv4(),
+          Name: formik.values.Name,
+          Price: formik.values.Price,
+          ProductCode: formik.values.ProductCode,
+          Size: formik.values.Size.map((s: any) => s.value),
+          imageURL,
+        };
+        console.log(newShoe);
+        
+    
+        await addDoc(collection(db, 'shoes'), newShoe);
+    
+        dispatch(setShoe([...shoeData, newShoe]));
+        setOpenCreate(false);
+        formik.resetForm();
+        queryClient.invalidateQueries({ queryKey: ['shoes'] });
+      } catch (error) {
+        console.error('Error creating shoe:', error);
+      }
+    };
+    
+    const handleUpdate = async () => {
+      try {
+        await formik.validateForm();
+    
+        let imageURL = shoeData.find((shoe) => shoe.id === selectedShoeId)?.imageURL;
+        
+        if (fileList.length > 0) {
+          const file = fileList[0].originFileObj;
+          const storageRef = ref(storage, `shoes/${uuidv4()}-${file.name}`);
+          const uploadTask = uploadBytesResumable(storageRef, file);
+          await uploadTask;
+    
+          const newImageURL = await getDownloadURL(storageRef);
+    
+          if (imageURL && imageURL !== newImageURL) {
+            try {
+              const oldImageRef = ref(storage, imageURL);
+              await deleteObject(oldImageRef);
+            } catch (deleteError) {
+              console.error('Error deleting old image:', deleteError);
+              // Handle error deleting old image
+            }
+          }
+    
+          imageURL = newImageURL;
+        }
+    
+        const updatedShoe = {
+          id: selectedShoeId,
+          Name: formik.values.Name,
+          Price: formik.values.Price,
+          ProductCode: formik.values.ProductCode,
+          Size: formik.values.Size.map((s: any) => s.value),
+          imageURL,
+        };
+    
+        console.log(updatedShoe);
+    
+        await setDoc(doc(db, 'shoes', selectedShoeId), updatedShoe, { merge: true });
+    
+        const updatedShoes = shoeData.map((shoe) => (shoe.id === selectedShoeId ? updatedShoe : shoe));
+        dispatch(setShoe(updatedShoes));
+    
+        setOpenUpdate(false);
+        formik.resetForm();
+    
+        queryClient.invalidateQueries({ queryKey: ['shoes'] });
+      } catch (error) {
+        console.error('Error updating shoe:', error);
+      }
+    };
+    
+    
+  
     return (
       <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
         <SiderbarShoe collapsed={collapsed} />
@@ -218,35 +327,50 @@ const Page: React.FC = () => {
           </Content>
           <Modal
           title="Add shoe"
-          visible={openCreate}
+          visible={openCreate} 
           confirmLoading={confirmLoading}
           onCancel={() => {
             setOpenCreate(false);
           }}
           width={1000}
         >
-          <Form >
-            <Form.Item name="name" label="Name">
-              <Input />
+          <Form   onFinish={handleCreate} initialValues={formik.initialValues}>
+          <Form.Item name="Name" label="Name">
+              <Input
+                name="Name"
+                value={formik.values.Name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
+          </Form.Item>
+            <Form.Item name="Price" label="Price">
+            <Input
+                name="Price"
+                value={formik.values.Price}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
             </Form.Item>
-            <Form.Item name="price" label="Price">
-              <InputNumber />
+            <Form.Item name="ProductCode" label="Product Code">
+              <Input 
+                value={formik.values.ProductCode}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}/>
             </Form.Item>
-            <Form.Item name="productCode" label="Product Code">
-              <Input />
-            </Form.Item>
-            <Form.Item
-              name="size"
-              label="Size"
-            >
+            <Form.Item name="Size" label="Size">
               <Select
                 options={sizeOptions}
                 isMulti
-                name="size"
+                name="Size"
                 className="basic-multi-select"
                 classNamePrefix="select"
+                value={formik.values.Size}
+                onChange={(selectedOptions) => formik.setFieldValue('Size', selectedOptions)}
+                onBlur={formik.handleBlur}
               />
             </Form.Item>
+
+
             <Form.Item
               name="image"
               label="Image"
@@ -267,6 +391,7 @@ const Page: React.FC = () => {
                 <Button icon={<UploadOutlined />}>Upload Image</Button>
               </Upload>
             </Form.Item>
+
             <Form.Item>
             <Button type="primary" htmlType="submit">
               Submit
@@ -274,7 +399,7 @@ const Page: React.FC = () => {
             </Form.Item>
           </Form>
          </Modal>
-        <Modal
+         <Modal
           title="Update Shoe"
           visible={openUpdate}
           confirmLoading={confirmLoading}
@@ -283,26 +408,43 @@ const Page: React.FC = () => {
           }}
           width={1000}
         >
-          <Form>
-            <Form.Item name="note" label="Name">
-              <Input />
+          <Form onFinish={handleUpdate} initialValues={{...shoeData.find((shoe) => shoe.id === selectedShoeId)}} >
+          <Form.Item name="id" style={{ display: 'none' }}>
+            <Input type="hidden" />
+          </Form.Item>
+            <Form.Item name="Name" label="Name">
+              <Input
+                name="Name"
+                value={formik.values.Name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
             </Form.Item>
-            <Form.Item name="price" label="Price">
-              <InputNumber />
+            <Form.Item name="Price" label="Price">
+              <InputNumber
+                name="Price"
+                value={formik.values.Price}
+                onChange={(value) => formik.setFieldValue('Price', value)}
+                onBlur={formik.handleBlur}
+              />
             </Form.Item>
-            <Form.Item name="productCode" label="Product Code">
-              <Input />
+            <Form.Item name="ProductCode" label="Product Code">
+              <Input
+                value={formik.values.ProductCode}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              />
             </Form.Item>
-            <Form.Item
-              name="size"
-              label="Size"
-            >
+            <Form.Item name="Size" label="Size">
               <Select
                 options={sizeOptions}
                 isMulti
-                name="size"
+                name="Size"
                 className="basic-multi-select"
                 classNamePrefix="select"
+                value={formik.values.Size}
+                onChange={(selectedOptions) => formik.setFieldValue('Size', selectedOptions)}
+                onBlur={formik.handleBlur}
               />
             </Form.Item>
             <Form.Item
@@ -326,12 +468,13 @@ const Page: React.FC = () => {
               </Upload>
             </Form.Item>
             <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
+              <Button type="primary" htmlType="submit">
+                Submit
+              </Button>
             </Form.Item>
           </Form>
-        </Modal>  
+        </Modal>
+
         </Layout>
       </Layout>
     );
