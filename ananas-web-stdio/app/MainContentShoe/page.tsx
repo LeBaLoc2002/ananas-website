@@ -103,7 +103,6 @@ const Page: React.FC = () => {
 
   const handleDelete = async (id: string, imageURL: string) => {
     try {
-      console.log('Deleting document with ID:', id);
       await deleteDoc(doc(db, 'shoes', id));
   
       if (imageURL) {
@@ -217,7 +216,6 @@ const Page: React.FC = () => {
               await deleteObject(oldImageRef);
             } catch (deleteError) {
               console.error('Error deleting old image:', deleteError);
-              // Handle error deleting old image
             }
           }
     
