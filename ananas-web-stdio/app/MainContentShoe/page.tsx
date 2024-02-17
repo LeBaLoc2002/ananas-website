@@ -18,8 +18,13 @@ import { useFormik } from 'formik';
 import { v4 as uuidv4 } from 'uuid';
 interface Shoe {
   id: string;
+  Name: string;
+  Price: number;
+  ProductCode: string;
+  Size: any[];
   imageURL: string;
 }
+
 const { Content } = Layout;
 
 const Page: React.FC = () => {
@@ -234,9 +239,11 @@ const Page: React.FC = () => {
       };
   
       console.log(updatedShoe);
-  
-      await setDoc(doc(db, 'shoes', selectedShoeId), updatedShoe, { merge: true });
-  
+      
+      if (selectedShoeId !== null) {
+        await setDoc(doc(db, 'shoes', selectedShoeId), updatedShoe, { merge: true });
+      }  
+
       const updatedShoes = shoeData.map((shoe) => (shoe.id === selectedShoeId ? updatedShoe : shoe));
       dispatch(setShoe(updatedShoes));
   
