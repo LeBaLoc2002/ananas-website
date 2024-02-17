@@ -244,7 +244,14 @@ const Page: React.FC = () => {
         await setDoc(doc(db, 'shoes', selectedShoeId), updatedShoe, { merge: true });
       }  
 
-      const updatedShoes = shoeData.map((shoe) => (shoe.id === selectedShoeId ? updatedShoe : shoe));
+      const updatedShoes = shoeData.map((shoe) => {
+        if (shoe.id === selectedShoeId) {
+          return updatedShoe as Shoe;
+        } else {
+          return shoe as Shoe;
+        }
+      });
+      
       dispatch(setShoe(updatedShoes));
   
       setOpenUpdate(false);
