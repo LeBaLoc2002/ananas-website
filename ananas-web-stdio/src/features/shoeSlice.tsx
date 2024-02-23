@@ -19,6 +19,12 @@ const shoeSlice = createSlice({
     setShoe: (state, action: PayloadAction<Shoe[]>) => {
       state.list = action.payload;
     },
+    createShoe: (state, action: PayloadAction<Shoe[]>) => {
+      state.list = action.payload;
+    },
+    updateShoe: (state, action: PayloadAction<Shoe[]>) => {
+      state.list = action.payload;
+    },
     deleteShoe: (state, action: PayloadAction<string>) => {
       const deletedItemId = action.payload;
       state.list = state.list.filter(item => item.id !== deletedItemId);
@@ -26,6 +32,6 @@ const shoeSlice = createSlice({
   },
 });
 
-export const { setShoe, deleteShoe } = shoeSlice.actions;
+export const { setShoe, deleteShoe ,createShoe, updateShoe} = shoeSlice.actions;
 export const selectShoe = (state: { shoes: ShoeState }) => state.shoes;
 export default shoeSlice.reducer;

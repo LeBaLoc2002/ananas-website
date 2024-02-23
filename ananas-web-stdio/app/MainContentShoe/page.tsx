@@ -1,17 +1,17 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Button, Col, ColorPicker, Dropdown, Form, Input, InputNumber, Layout, Menu, MenuProps, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
+import { Button, Dropdown, Form, Image, Input, InputNumber, Layout, Menu, MenuProps, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
 import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { addDoc, collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { useDispatch } from 'react-redux';
-import { deleteShoe, setShoe } from '@/src/features/shoeSlice';
+import { createShoe, deleteShoe, setShoe, updateShoe } from '@/src/features/shoeSlice';
 import { db, storage } from '@/src/firebase';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
-import { UploadOutlined, HeartOutlined, LoginOutlined, ShoppingCartOutlined , UserOutlined} from '@ant-design/icons';
+import { UploadOutlined, UserOutlined} from '@ant-design/icons';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
@@ -23,6 +23,10 @@ interface Shoe {
   ProductCode: string;
   Size: any[];
   imageURL: string;
+}
+interface sizeOption {
+  readonly value: string;
+  readonly label: string;
 }
 
 const { Content } = Layout;
@@ -43,7 +47,15 @@ const Page: React.FC = () => {
     {
       title: 'Price',
       dataIndex: 'Price',
+      render: (price: number) => {
+        return (
+          <span className='font-bold	'>
+            {price.toLocaleString('it-IT', { style: 'currency', currency: 'VND' })}
+          </span>
+        );
+      },
     },
+    
     {
       title: 'Product Code',
       dataIndex: 'ProductCode',
@@ -70,7 +82,7 @@ const Page: React.FC = () => {
     {
       title: 'Image URL',
       dataIndex: 'imageURL',
-      render: (text: string) => <img src={text} alt="Product" style={{ width: '50px', height: '50px' }} />,
+      render: (text: string) => <Image width={100} src={text}/>,
     },
     {
       title: 'Action',
@@ -84,16 +96,7 @@ const Page: React.FC = () => {
     },
   ];
 
-  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    message.info('Click on left button.');
-    console.log('click left button', e);
-  };
-  
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
-    message.info('Click on menu item.');
-    console.log('click', e);
-  };
-  
+
   const items: MenuProps['items'] = [
     {
       label: '1st menu item',
@@ -108,8 +111,7 @@ const Page: React.FC = () => {
   ];
   
   const menuProps = {
-    items,
-    onClick: handleMenuClick,
+    items
   };
   
   
@@ -179,19 +181,32 @@ const Page: React.FC = () => {
         message.error(`${info.file.name} file upload failed.`);
     }
   };
+    
   
-  const sizeOptions = Array.from({ length: 9 }, (_, index) => ({ value: `${37 + index}`, label: `${37 + index}` }));
-
-  const formik = useFormik({
-    initialValues: {
+  const sizeOptions = [
+    { value: '37', label: '37' },
+    { value: '38', label: '38' },
+    { value: '39', label: '39' },
+    { value: '40', label: '40' },
+    { value: '41', label: '41' },
+    { value: '42', label: '42' },
+    { value: '43', label: '43' },
+    { value: '44', label: '44' },
+    { value: '45', label: '45' },
+  ];
+  
+  const initValues: any = {
       id: '',
       Name: '',
       Price: 0,
       ProductCode: '',
       Size: [''],
       imageURL:'',
-    },
+  }
+  const formik = useFormik({
+    initialValues: initValues,
     onSubmit: () => {}, 
+    enableReinitialize: true,
     validationSchema: Yup.object().shape({
       Name: Yup.string().required('Name is required'),
       Price: Yup.number().required('Price is required'),
@@ -225,9 +240,12 @@ const Page: React.FC = () => {
   
       await addDoc(collection(db, 'shoes'), newShoe);
   
-      dispatch(setShoe([...shoeData, newShoe]));
+      dispatch(createShoe([...shoeData, newShoe]));
+      
+      formik.resetForm(); 
+
+      
       setOpenCreate(false);
-      formik.resetForm();
       queryClient.invalidateQueries({ queryKey: ['shoes'] });
       refetch()
     } catch (error) {
@@ -257,7 +275,6 @@ const Page: React.FC = () => {
             console.error('Error deleting old image:', deleteError);
           }
         }
-  
         imageURL = newImageURL;
       }
   
@@ -285,11 +302,9 @@ const Page: React.FC = () => {
         }
       });
       
-      dispatch(setShoe(updatedShoes));
-  
-      setOpenUpdate(false);
+      dispatch(updateShoe(updatedShoes));
       formik.resetForm();
-  
+      setOpenUpdate(false);
       queryClient.invalidateQueries({ queryKey: ['shoes'] });
       refetch()
     } catch (error) {
@@ -297,254 +312,255 @@ const Page: React.FC = () => {
     }
   };
 
-  
-  
-    return (
-      <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
-        <SiderbarShoe collapsed={collapsed} />
-        <Layout className='rounded p-5 bg-cyan-100 md:m-4'  style={{borderRadius: '15px'}}>
-        <HeaderShoe collapsed={collapsed} setCollapsed={() => setCollapsed(!collapsed)} />
-          <Content
-            style={{
-              margin: '10px 16px',
-              padding: 24,
-              minHeight: 280,
-              borderRadius: borderRadiusLG,
-            }}
-            className='bg-cyan-100'
-          >
-              <Menu mode="horizontal" className='menuOne rounded-xl'>
-                <Menu.Item key="Pickup">
-                <h2>Pickup 1</h2>
-                    <p>24 orders - 09:00 AM</p>
-                </Menu.Item>
-                <Menu.Item key="itemPickup" style={{ marginLeft: 'auto', justifyContent: 'center' }} className='itemPickup  mt-7'>
-                <Dropdown.Button menu={menuProps} onClick={handleButtonClick} className='mt-7 max-sm:mt-0'>
-                  Pickup
-                </Dropdown.Button>
-                    </Menu.Item>
-              </Menu>
-              <Menu  className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
-                <Menu.Item key="fff">
-                  <div className="font-black">#fff</div>
-                </Menu.Item>
-                <Menu.Item key="b">
-                  <div className="font-black">B</div>
-                </Menu.Item>
-                <Menu.Item key="30">
-                  <div className="font-black">30 Jan 2024</div>
-                </Menu.Item>
-                <Menu.Item key="40">
-                  <div className="font-black">40$</div>
-                </Menu.Item>
-              </Menu>
-              <Table
-                title={() => (
-                  <div className='flex justify-between items-center'>
-                    <p className='font-black size-1 hidden md:block'>Manager shoes</p>
-                    <div className='flex justify-end items-center'>
-                      <div className='md:order-2'>
-                        <Button type="default" size={'middle'} onClick={showModalCreate}>
-                          Create
-                        </Button>
-                      </div>
+  return (
+    <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
+      <SiderbarShoe collapsed={collapsed} />
+      <Layout className='rounded p-5 bg-cyan-100 md:m-4'  style={{borderRadius: '15px'}}>
+      <HeaderShoe collapsed={collapsed} setCollapsed={() => setCollapsed(!collapsed)} />
+        <Content
+          style={{
+            margin: '10px 10px',
+            padding: 20,
+            minHeight: 280,
+            borderRadius: borderRadiusLG,
+          }}
+          className='bg-cyan-100'
+        >
+            <Menu mode="horizontal" className='menuOne rounded-xl'>
+              <Menu.Item key="Pickup">
+              <h2>Pickup 1</h2>
+                  <p>24 orders - 09:00 AM</p>
+              </Menu.Item>
+              <Menu.Item key="itemPickup" style={{ marginLeft: 'auto', justifyContent: 'center'}} className='itemPickup  mt-7'>
+              <Dropdown.Button menu={menuProps} className='mt-7 max-sm:mt-0  max-sm:hidden'>
+                Pickup
+              </Dropdown.Button>
+                  </Menu.Item>
+            </Menu>
+            <Menu  className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
+              <Menu.Item key="fff">
+                <div className="font-black">#fff</div>
+              </Menu.Item>
+              <Menu.Item key="b">
+                <div className="font-black">B</div>
+              </Menu.Item>
+              <Menu.Item key="30">
+                <div className="font-black">30 Jan 2024</div>
+              </Menu.Item>
+              <Menu.Item key="40">
+                <div className="font-black">40$</div>
+              </Menu.Item>
+            </Menu>
+            <Table
+              title={() => (
+                <div className='flex justify-between items-center'>
+                  <p className='font-black size-1 hidden md:block'>Manager shoes</p>
+                  <div className='flex justify-end items-center'>
+                    <div className='md:order-1'>
+                      <Button type="default" size={'middle'} onClick={showModalCreate}>
+                        Create
+                      </Button>
                     </div>
                   </div>
-                )}
-                columns={columns}
-                dataSource={shoeData}
-                size="small"
-                scroll={{ x: 700, y: 300 }} 
-                pagination={false}
-                bordered 
-                className='text-center'
-              />
+                </div>
+              )}
+              columns={columns}
+              dataSource={shoeData}
+              size="small"
+              scroll={{ x: 700, y: 300 }} 
+              pagination={false}
+              bordered 
+              className='text-center'
+            />
 
-             <Menu  className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
-                <Menu.Item key="fff">
-                  <div className="font-black">#fff</div>
-                </Menu.Item>
-                <Menu.Item key="b">
-                  <div className="font-black">B</div>
-                </Menu.Item>
-                <Menu.Item key="30">
-                  <div className="font-black">30 Jan 2024</div>
-                </Menu.Item>
-                <Menu.Item key="40">
-                  <div className="font-black">40$</div>
-                </Menu.Item>
-              </Menu>
-          </Content>
-          <Modal
-          title="Add shoe"
-          visible={openCreate} 
-          confirmLoading={confirmLoading}
-          onCancel={() => {
-            setOpenCreate(false);
-          }}
-          
-          width={1000}
-        >
-          <Form   onFinish={handleCreate} initialValues={formik.initialValues}>
-          <Form.Item name="Name" label="Name">
-              <Input
-                name="Name"
-                value={formik.values.Name}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-          </Form.Item>
-          {formik.touched.Name && formik.errors.Name ? <div className="error-message">{formik.errors.Name}</div> : null}
-
-            <Form.Item name="Price" label="Price">
+            <Menu  className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
+              <Menu.Item key="fff">
+                <div className="font-black">#fff</div>
+              </Menu.Item>
+              <Menu.Item key="b">
+                <div className="font-black">B</div>
+              </Menu.Item>
+              <Menu.Item key="30">
+                <div className="font-black">30 Jan 2024</div>
+              </Menu.Item>
+              <Menu.Item key="40">
+                <div className="font-black">40$</div>
+              </Menu.Item>
+            </Menu>
+        </Content>
+        <Modal
+        title="Add shoe"
+        visible={openCreate} 
+        confirmLoading={confirmLoading}
+        onCancel={() => {
+          setOpenCreate(false);
+        }}
+        
+        width={1000}
+      >
+        <Form  onFinish={handleCreate} initialValues={formik.initialValues}>
+        <Form.Item name="Name" label="Name">
             <Input
-                name="Price"
-                value={formik.values.Price}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-            </Form.Item>
-            {formik.touched.Price && formik.errors.Price ? <div className="error-message">{formik.errors.Price}</div> : null}
+              name="Name"
+              value={formik.values.Name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+        </Form.Item>
+        {formik.touched.Name && formik.errors.Name ? <div className="error-message">{String(formik.errors.Name)}</div> : null}
 
-            <Form.Item name="ProductCode" label="Product Code">
-              <Input 
-                value={formik.values.ProductCode}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}/>
-            </Form.Item>
-            <Form.Item>
-            {formik.touched.ProductCode && formik.errors.ProductCode ? <div className="error-message">{formik.errors.ProductCode}</div> : null}
+          <Form.Item name="Price" label="Price">
+          <Input
+              type='number'
+              name="Price"
+              value={formik.values.Price}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </Form.Item>
+          {formik.touched.Price && formik.errors.Price ? (
+            <div className="error-message">{String(formik.errors.Price)}</div>
+          ) : null}
 
-            </Form.Item>
-            <Form.Item name="Size" label="Size" className='inputSelect'>
-              <Select
-                options={sizeOptions}
-                isMulti
-                name="Size"
-                className="basic-multi-select"
-                classNamePrefix="select"
-                value={formik.values.Size}
-                onChange={(selectedOptions) => formik.setFieldValue('Size', selectedOptions)}
-                onBlur={formik.handleBlur}
-              />
-            </Form.Item>
-            {formik.touched.Size && formik.errors.Size ? <div className="error-message">{formik.errors.Size}</div> : null}
+          <Form.Item name="ProductCode" label="Product Code">
+            <Input 
+              value={formik.values.ProductCode}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}/>
+          </Form.Item>
+          <Form.Item>
+          {formik.touched.ProductCode && formik.errors.ProductCode ? <div className="error-message">{String(formik.errors.ProductCode)}</div> : null}
+
+          </Form.Item>
+          <Form.Item name="Size" label="Size" className='inputSelect'>
+            <Select
+              options={sizeOptions}
+              isMulti
+              name="size"
+              className="basic-multi-select inputSelect"
+              classNamePrefix="select"
+              value={formik.values.Size}
+              onChange={(selectedOptions) => formik.setFieldValue('Size', selectedOptions)}
+              onBlur={formik.handleBlur}
+            />
+          </Form.Item>
+          {formik.touched.Size && formik.errors.Size ? <div className="error-message">{String(formik.errors.Size)}</div> : null}
 
 
-            <Form.Item
+          <Form.Item
+            name="image"
+            label="Image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => e.fileList}
+            rules={[{ required: true, message: 'Please upload an image!' }]}
+            className='sm:max-w-64 fieldImage text-black mt-2'
+          >
+            <Upload
               name="image"
-              label="Image"
-              valuePropName="fileList"
-              getValueFromEvent={(e) => e.fileList}
-              rules={[{ required: true, message: 'Please upload an image!' }]}
-              className='sm:max-w-64 fieldImage text-black mt-2'
+              listType="picture"
+              fileList={fileList}
+              onChange={(info) => {
+                setFileList(info.fileList);
+                handleFileChange(info);
+              }}
             >
-              <Upload
-                name="image"
-                listType="picture"
-                fileList={fileList}
-                onChange={(info) => {
-                  setFileList(info.fileList);
-                  handleFileChange(info);
-                }}
-              >
-                <Button icon={<UploadOutlined />}>Upload Image</Button>
-              </Upload>
-            </Form.Item>
+              <Button icon={<UploadOutlined />}>Upload Image</Button>
+            </Upload>
+          </Form.Item>
 
-            <Form.Item>
+          <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Submit
+          </Button>
+          </Form.Item>
+        </Form>
+        </Modal>
+        <Modal
+        title="Update Shoe"
+        visible={openUpdate}
+        confirmLoading={confirmLoading}
+        onCancel={() => {
+          setOpenUpdate(false);
+        }}
+        width={1000}
+      >
+        <Form onFinish={handleUpdate} initialValues={{...shoeData.find((shoe) => shoe.id === selectedShoeId)}} >
+        <Form.Item name="id" style={{ display: 'none' }}>
+          <Input type="hidden" />
+        </Form.Item>
+          <Form.Item name="Name" label="Name">
+            <Input
+              name="Name"
+              value={formik.values.Name}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </Form.Item>
+          {formik.touched.Name && formik.errors.Name ? <div className="error-message">{String(formik.errors.Name)}</div> : null}
+          <Form.Item name="Price" label="Price">
+            <InputNumber
+              name="Price"
+              type='number'
+              value={formik.values.Price}
+              onChange={(value) => formik.setFieldValue('Price', value)}
+              onBlur={formik.handleBlur}
+            />
+          </Form.Item>
+          {formik.touched.Price && formik.errors.Price ? <div className="error-message">{String(formik.errors.Price)}</div> : null}
+
+          <Form.Item name="ProductCode" label="Product Code">
+            <Input
+              value={formik.values.ProductCode}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+            />
+          </Form.Item>
+          {formik.touched.ProductCode && formik.errors.ProductCode ? <div className="error-message">{String(formik.errors.ProductCode)}</div> : null}
+
+          <Form.Item name="Size" label="Size" className='inputSelect'>
+            <Select
+              options={sizeOptions}
+              isMulti={true}
+              name="Size"
+              className="basic-multi-select inputSelect"
+              classNamePrefix="select"
+              value={formik.values.Size}
+              onChange={(selectedOptions) => formik.setFieldValue('Size', selectedOptions)}
+              onBlur={formik.handleBlur}
+            />
+          </Form.Item>
+          {formik.touched.Size && formik.errors.Size ? <div className="error-message">{String(formik.errors.Size)}</div> : null}
+
+          <Form.Item
+            name="image"
+            label="Image"
+            valuePropName="fileList"
+            getValueFromEvent={(e) => e.fileList}
+            rules={[{ required: true, message: 'Please upload an image!' }]}
+            className='sm:max-w-64 fieldImage text-black mt-2'
+          >
+            <Upload
+              name="image"
+              listType="picture"
+              fileList={fileList}
+              onChange={(info) => {
+                setFileList(info.fileList);
+                handleFileChange(info);
+              }}
+            >
+              <Button icon={<UploadOutlined />}>Upload Image</Button>
+            </Upload>
+          </Form.Item>
+          <Form.Item>
             <Button type="primary" htmlType="submit">
               Submit
             </Button>
-            </Form.Item>
-          </Form>
-         </Modal>
-         <Modal
-          title="Update Shoe"
-          visible={openUpdate}
-          confirmLoading={confirmLoading}
-          onCancel={() => {
-            setOpenUpdate(false);
-          }}
-          width={1000}
-        >
-          <Form onFinish={handleUpdate} initialValues={{...shoeData.find((shoe) => shoe.id === selectedShoeId)}} >
-          <Form.Item name="id" style={{ display: 'none' }}>
-            <Input type="hidden" />
           </Form.Item>
-            <Form.Item name="Name" label="Name">
-              <Input
-                name="Name"
-                value={formik.values.Name}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-            </Form.Item>
-            {formik.touched.Name && formik.errors.Name ? <div className="error-message">{formik.errors.Name}</div> : null}
-            <Form.Item name="Price" label="Price">
-              <InputNumber
-                name="Price"
-                value={formik.values.Price}
-                onChange={(value) => formik.setFieldValue('Price', value)}
-                onBlur={formik.handleBlur}
-              />
-            </Form.Item>
-            {formik.touched.Price && formik.errors.Price ? <div className="error-message">{formik.errors.Price}</div> : null}
-
-            <Form.Item name="ProductCode" label="Product Code">
-              <Input
-                value={formik.values.ProductCode}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-              />
-            </Form.Item>
-            {formik.touched.ProductCode && formik.errors.ProductCode ? <div className="error-message">{formik.errors.ProductCode}</div> : null}
-
-            <Form.Item name="Size" label="Size" className='inputSelect'>
-              <Select
-                options={sizeOptions}
-                isMulti={true}
-                name="Size"
-                className="basic-multi-select"
-                classNamePrefix="select"
-                value={formik.values.Size}
-                onChange={(selectedOptions) => formik.setFieldValue('Size', selectedOptions)}
-                onBlur={formik.handleBlur}
-              />
-            </Form.Item>
-            {formik.touched.Size && formik.errors.Size ? <div className="error-message">{formik.errors.Size}</div> : null}
-
-            <Form.Item
-              name="image"
-              label="Image"
-              valuePropName="fileList"
-              getValueFromEvent={(e) => e.fileList}
-              rules={[{ required: true, message: 'Please upload an image!' }]}
-              className='sm:max-w-64 fieldImage text-black mt-2'
-            >
-              <Upload
-                name="image"
-                listType="picture"
-                fileList={fileList}
-                onChange={(info) => {
-                  setFileList(info.fileList);
-                  handleFileChange(info);
-                }}
-              >
-                <Button icon={<UploadOutlined />}>Upload Image</Button>
-              </Upload>
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" htmlType="submit">
-                Submit
-              </Button>
-            </Form.Item>
-          </Form>
-        </Modal>
-
-        </Layout>
+        </Form>
+      </Modal>
       </Layout>
-    );
+    </Layout>
+  );
 };
 
 export default Page;
