@@ -1,6 +1,6 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Button, Col, ColorPicker, Dropdown, Form, Input, InputNumber, Layout, Menu, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
+import { Button, Col, ColorPicker, Dropdown, Form, Input, InputNumber, Layout, Menu, MenuProps, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
 import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
@@ -11,7 +11,7 @@ import { deleteShoe, setShoe } from '@/src/features/shoeSlice';
 import { db, storage } from '@/src/firebase';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
-import { UploadOutlined, HeartOutlined, LoginOutlined, ShoppingCartOutlined } from '@ant-design/icons';
+import { UploadOutlined, HeartOutlined, LoginOutlined, ShoppingCartOutlined , UserOutlined} from '@ant-design/icons';
 import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
@@ -83,6 +83,36 @@ const Page: React.FC = () => {
         ),
     },
   ];
+
+  const handleButtonClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    message.info('Click on left button.');
+    console.log('click left button', e);
+  };
+  
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    message.info('Click on menu item.');
+    console.log('click', e);
+  };
+  
+  const items: MenuProps['items'] = [
+    {
+      label: '1st menu item',
+      key: '1',
+      icon: <UserOutlined />,
+    },
+    {
+      label: '2nd menu item',
+      key: '2',
+      icon: <UserOutlined />,
+    },
+  ];
+  
+  const menuProps = {
+    items,
+    onClick: handleMenuClick,
+  };
+  
+  
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [fileList, setFileList] = useState<any[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
@@ -117,8 +147,8 @@ const Page: React.FC = () => {
         console.log('Deleting image at URL:', imageURL);
         const storageRef = ref(storage, imageURL);
         await deleteObject(storageRef);
+        refetch()
       }
-  
     } catch (error) {
       console.error('Error deleting document: ', error);
     }
@@ -127,7 +157,7 @@ const Page: React.FC = () => {
 
   useEffect(() => {
     queryClient.invalidateQueries({ queryKey: ['shoes'] })
-  })
+  },[])
 
 
   const showModalUpdate = (id: any) => {
@@ -163,12 +193,13 @@ const Page: React.FC = () => {
     },
     onSubmit: () => {}, 
     validationSchema: Yup.object().shape({
-      name: Yup.string().required('Name is required'),
-      price: Yup.number().required('Price is required'),
-      productCode: Yup.string().required('Product Code is required'),
-      size: Yup.array().min(1, 'Please select at least one size'),
+      Name: Yup.string().required('Name is required'),
+      Price: Yup.number().required('Price is required'),
+      ProductCode: Yup.string().required('Product Code is required'),
+      Size: Yup.array().min(1, 'Please select at least one size'),
     }),
   });
+
   const handleCreate = async () => {
     try {
       await formik.validateForm();
@@ -198,6 +229,7 @@ const Page: React.FC = () => {
       setOpenCreate(false);
       formik.resetForm();
       queryClient.invalidateQueries({ queryKey: ['shoes'] });
+      refetch()
     } catch (error) {
       console.error('Error creating shoe:', error);
     }
@@ -237,6 +269,7 @@ const Page: React.FC = () => {
         Size: formik.values.Size.map((s: any) => s.value),
         imageURL,
       };
+      
   
       console.log(updatedShoe);
       
@@ -258,16 +291,19 @@ const Page: React.FC = () => {
       formik.resetForm();
   
       queryClient.invalidateQueries({ queryKey: ['shoes'] });
+      refetch()
     } catch (error) {
       console.error('Error updating shoe:', error);
     }
   };
+
+  
   
     return (
       <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
         <SiderbarShoe collapsed={collapsed} />
-        <Layout className='rounded p-5 bg-cyan-100 md:m-4'  style={{borderRadius: '50px'}}>
-          <HeaderShoe collapsed={collapsed} setCollapsed={setCollapsed} />
+        <Layout className='rounded p-5 bg-cyan-100 md:m-4'  style={{borderRadius: '15px'}}>
+        <HeaderShoe collapsed={collapsed} setCollapsed={() => setCollapsed(!collapsed)} />
           <Content
             style={{
               margin: '10px 16px',
@@ -277,16 +313,18 @@ const Page: React.FC = () => {
             }}
             className='bg-cyan-100'
           >
-              <Menu mode="horizontal" className='menuOne'>
+              <Menu mode="horizontal" className='menuOne rounded-xl'>
                 <Menu.Item key="Pickup">
                 <h2>Pickup 1</h2>
                     <p>24 orders - 09:00 AM</p>
                 </Menu.Item>
                 <Menu.Item key="itemPickup" style={{ marginLeft: 'auto', justifyContent: 'center' }} className='itemPickup  mt-7'>
-                <Dropdown.Button className='justify-end mt-7	'>Pickup</Dropdown.Button>
-                </Menu.Item>
+                <Dropdown.Button menu={menuProps} onClick={handleButtonClick} className='mt-7 max-sm:mt-0'>
+                  Pickup
+                </Dropdown.Button>
+                    </Menu.Item>
               </Menu>
-              <Menu mode="horizontal" className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
+              <Menu  className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
                 <Menu.Item key="fff">
                   <div className="font-black">#fff</div>
                 </Menu.Item>
@@ -322,7 +360,7 @@ const Page: React.FC = () => {
                 className='text-center'
               />
 
-             <Menu mode="horizontal" className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
+             <Menu  className='flex items-center justify-between w-full row-header-center'  style={{backgroundColor: '#b5e3afa9'}} >
                 <Menu.Item key="fff">
                   <div className="font-black">#fff</div>
                 </Menu.Item>
@@ -344,6 +382,7 @@ const Page: React.FC = () => {
           onCancel={() => {
             setOpenCreate(false);
           }}
+          
           width={1000}
         >
           <Form   onFinish={handleCreate} initialValues={formik.initialValues}>
@@ -355,6 +394,8 @@ const Page: React.FC = () => {
                 onBlur={formik.handleBlur}
               />
           </Form.Item>
+          {formik.touched.Name && formik.errors.Name ? <div className="error-message">{formik.errors.Name}</div> : null}
+
             <Form.Item name="Price" label="Price">
             <Input
                 name="Price"
@@ -363,13 +404,19 @@ const Page: React.FC = () => {
                 onBlur={formik.handleBlur}
               />
             </Form.Item>
+            {formik.touched.Price && formik.errors.Price ? <div className="error-message">{formik.errors.Price}</div> : null}
+
             <Form.Item name="ProductCode" label="Product Code">
               <Input 
                 value={formik.values.ProductCode}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}/>
             </Form.Item>
-            <Form.Item name="Size" label="Size">
+            <Form.Item>
+            {formik.touched.ProductCode && formik.errors.ProductCode ? <div className="error-message">{formik.errors.ProductCode}</div> : null}
+
+            </Form.Item>
+            <Form.Item name="Size" label="Size" className='inputSelect'>
               <Select
                 options={sizeOptions}
                 isMulti
@@ -381,6 +428,7 @@ const Page: React.FC = () => {
                 onBlur={formik.handleBlur}
               />
             </Form.Item>
+            {formik.touched.Size && formik.errors.Size ? <div className="error-message">{formik.errors.Size}</div> : null}
 
 
             <Form.Item
@@ -432,6 +480,7 @@ const Page: React.FC = () => {
                 onBlur={formik.handleBlur}
               />
             </Form.Item>
+            {formik.touched.Name && formik.errors.Name ? <div className="error-message">{formik.errors.Name}</div> : null}
             <Form.Item name="Price" label="Price">
               <InputNumber
                 name="Price"
@@ -440,6 +489,8 @@ const Page: React.FC = () => {
                 onBlur={formik.handleBlur}
               />
             </Form.Item>
+            {formik.touched.Price && formik.errors.Price ? <div className="error-message">{formik.errors.Price}</div> : null}
+
             <Form.Item name="ProductCode" label="Product Code">
               <Input
                 value={formik.values.ProductCode}
@@ -447,10 +498,12 @@ const Page: React.FC = () => {
                 onBlur={formik.handleBlur}
               />
             </Form.Item>
-            <Form.Item name="Size" label="Size">
+            {formik.touched.ProductCode && formik.errors.ProductCode ? <div className="error-message">{formik.errors.ProductCode}</div> : null}
+
+            <Form.Item name="Size" label="Size" className='inputSelect'>
               <Select
                 options={sizeOptions}
-                isMulti
+                isMulti={true}
                 name="Size"
                 className="basic-multi-select"
                 classNamePrefix="select"
@@ -459,6 +512,8 @@ const Page: React.FC = () => {
                 onBlur={formik.handleBlur}
               />
             </Form.Item>
+            {formik.touched.Size && formik.errors.Size ? <div className="error-message">{formik.errors.Size}</div> : null}
+
             <Form.Item
               name="image"
               label="Image"
