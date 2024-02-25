@@ -163,9 +163,14 @@ const Page: React.FC = () => {
 
 
   const showModalUpdate = (id: any) => {
+    const selectedShoe = shoeData.find((shoe) => shoe.id === id);
+    console.log(selectedShoe);
+  
     setSelectedShoeId(id);
+
     setOpenUpdate(true);
   };
+  
 
   
   const showModalCreate = () => {
@@ -203,9 +208,12 @@ const Page: React.FC = () => {
       Size: [''],
       imageURL:'',
   }
+
   const formik = useFormik({
     initialValues: initValues,
-    onSubmit: () => {}, 
+    onSubmit: async () => {
+
+      },
     enableReinitialize: true,
     validationSchema: Yup.object().shape({
       Name: Yup.string().required('Name is required'),
@@ -519,7 +527,7 @@ const Page: React.FC = () => {
 
           <Form.Item name="Size" label="Size" className='inputSelect'>
             <Select
-              options={sizeOptions}
+              options={sizeOptions.filter((option) => !formik.values.Size.some((selectedSize: any) => selectedSize.value === option.value))}
               isMulti={true}
               name="Size"
               className="basic-multi-select inputSelect"
