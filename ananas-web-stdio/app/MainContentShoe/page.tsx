@@ -1,13 +1,13 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Button, Dropdown, Form, Image, Input, InputNumber, Layout, Menu, MenuProps, Modal, Row, Table, TableColumnsType, Tag, Upload, message, theme } from 'antd';
+import { Button, Form, Image, Input, InputNumber, Layout, Modal, Table, TableColumnsType, Tag, theme } from 'antd';
 import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
 import { QueryClient, useQuery } from '@tanstack/react-query';
 import { addDoc, collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { useDispatch } from 'react-redux';
-import { createShoe, deleteShoe, setShoe, updateShoe } from '@/src/features/shoeSlice';
+import { createShoe, setShoe, updateShoe } from '@/src/features/shoeSlice';
 import { db, storage } from '@/src/firebase';
 import { toast } from 'react-toastify';
 import Select from 'react-select';
@@ -427,7 +427,7 @@ const Page: React.FC = () => {
             <section className="input-file" style={{border: '1px solid black', height:'160px', position: 'relative', overflow: 'hidden'}}>
                 <div {...getRootProps({className: 'dropzone'})} className='upload-file'>
                   <input {...getInputProps()} />
-                  <img src={uploadedImage} style={{width: "100%", height: "100%", objectFit: 'cover', position: 'absolute', top: '0', left: '0'}} />
+                  <img src={uploadedImage || formikCreate.values.imageURL} className='renderImage'/>
                   <p><UploadOutlined className='icon-file' /></p>
                 </div>
               </section>
@@ -507,7 +507,7 @@ const Page: React.FC = () => {
             <section className="input-file" style={{border: '1px solid black', height:'160px', position: 'relative', overflow: 'hidden'}}>
                 <div {...getRootProps({className: 'dropzone'})} className='upload-file'>
                   <input {...getInputProps()} />
-                  <img src={formikUpdate.values.imageURL} alt="Uploaded preview" style={{width: "100%", height: "100%", objectFit: 'cover', position: 'absolute', top: '0', left: '0'}} />
+                  <img src={formikUpdate.values.imageURL} className='renderImage' />
                   <p><UploadOutlined className='icon-file' /></p>
                 </div>
             </section>
