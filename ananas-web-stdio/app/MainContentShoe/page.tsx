@@ -256,21 +256,19 @@ const Page: React.FC = () => {
     
         let imageURL = (shoeData.find((shoe) => shoe.id === selectedShoeId) as { id: string; imageURL: string })?.imageURL;
         
-        let imageUrlOld = formikUpdate.values.imageURL; // Lấy URL ảnh cũ
+        let imageUrlOld = formikUpdate.values.imageURL;
       
-          // Nếu người dùng đã chọn một hình ảnh mới
           if (acceptedFiles.length > 0) {
               const file = acceptedFiles[0];
               const storageRef = ref(storage, `uploads/${uuidv4()}-${file.name}`);
               try {
-                  // Xóa ảnh cũ nếu tồn tại
                   if (imageUrlOld) {
                       const oldImageRef = ref(storage, imageUrlOld);
                       await deleteObject(oldImageRef);
                   }
       
                   await uploadBytesResumable(storageRef, file);
-                  imageUrlOld = await getDownloadURL(storageRef); // Lấy URL của ảnh mới
+                  imageUrlOld = await getDownloadURL(storageRef); 
       
               } catch (error) {
                   console.error("Lỗi khi xử lý ảnh:", error);
@@ -278,7 +276,6 @@ const Page: React.FC = () => {
               }
           }
   
-    
         const updatedShoe = {
           id: selectedShoeId,
           Name: formikUpdate.values.Name,
@@ -430,7 +427,7 @@ const Page: React.FC = () => {
             <section className="input-file" style={{border: '1px solid black', height:'160px', position: 'relative', overflow: 'hidden'}}>
                 <div {...getRootProps({className: 'dropzone'})} className='upload-file'>
                   <input {...getInputProps()} />
-                  <img src={formikCreate.values.imageURL} style={{width: "100%", height: "100%", objectFit: 'cover', position: 'absolute', top: '0', left: '0'}} />
+                  <img src={uploadedImage} style={{width: "100%", height: "100%", objectFit: 'cover', position: 'absolute', top: '0', left: '0'}} />
                   <p><UploadOutlined className='icon-file' /></p>
                 </div>
               </section>
