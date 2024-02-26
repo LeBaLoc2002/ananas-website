@@ -29,10 +29,6 @@ interface Shoe {
   imageURL: string;
 }
 
-interface sizeOption {
-  readonly value: string;
-  readonly label: string;
-}
 
 const { Content } = Layout;
 
@@ -103,12 +99,10 @@ const Page: React.FC = () => {
 
   
   const [confirmLoading, setConfirmLoading] = useState(false);
-  const [fileList, setFileList] = useState<any[]>([]);
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [selectedShoeId, setSelectedShoeId] = useState<string | null>(null);
   const [uploadedImage, setUploadedImage] = useState(null);
-  const [uploadedImageURL, setUploadedImageURL] = useState(null);
 
 
   const {acceptedFiles, getRootProps, getInputProps } = useDropzone({
@@ -116,7 +110,6 @@ const Page: React.FC = () => {
       const file = acceptedFiles[0];
       const imageUrl:any = URL.createObjectURL(file);
       setUploadedImage(imageUrl);
-      setUploadedImageURL(imageUrl); 
     }
   });
 
@@ -437,6 +430,7 @@ const Page: React.FC = () => {
             <section className="input-file" style={{border: '1px solid black', height:'160px', position: 'relative', overflow: 'hidden'}}>
                 <div {...getRootProps({className: 'dropzone'})} className='upload-file'>
                   <input {...getInputProps()} />
+                  <img src={formikCreate.values.imageURL} style={{width: "100%", height: "100%", objectFit: 'cover', position: 'absolute', top: '0', left: '0'}} />
                   <p><UploadOutlined className='icon-file' /></p>
                 </div>
               </section>
