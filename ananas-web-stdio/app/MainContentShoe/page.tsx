@@ -19,6 +19,8 @@ import { v4 as uuidv4 } from 'uuid';
 import {useDropzone} from 'react-dropzone'
 import MenuTable from '@/components/menuTable/menuTable';
 import MenuPickup from '@/components/menuPickup/menuPickup';
+import AddShoeModal from '@/components/AddShoeModal/AddShoeModal';
+import UpdateShoeModal from '@/components/UpdateShoeModal/UpdateShoeModal';
 
 interface Shoe {
   id: string;
@@ -98,20 +100,10 @@ const Page: React.FC = () => {
   ];
 
   
-  const [confirmLoading, setConfirmLoading] = useState(false);
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [selectedShoeId, setSelectedShoeId] = useState<string | null>(null);
-  const [uploadedImage, setUploadedImage] = useState(null);
 
-
-  const {acceptedFiles, getRootProps, getInputProps } = useDropzone({
-    onDrop: acceptedFiles => {
-      const file = acceptedFiles[0];
-      const imageUrl:any = URL.createObjectURL(file);
-      setUploadedImage(imageUrl);
-    }
-  });
 
   const {data: shoeData = [], isError, isLoading , refetch  } = useQuery({
     queryKey: ['shoes'],  
@@ -157,11 +149,10 @@ const Page: React.FC = () => {
     const selectedShoe: any = shoeData.find((shoe) => shoe.id === id);
     console.log(selectedShoe);
     
-    await formikUpdate.setValues({
-      ...selectedShoe,
-      Size: selectedShoe.Size.map((size : any) => ({ value: size, label: size }))      
-    });
-    console.log(selectedShoe.Size);
+    // await formikUpdate.setValues({
+    //   ...selectedShoe,
+    //   Size: selectedShoe.Size.map((size : any) => ({ value: size, label: size }))      
+    // });
     
     setSelectedShoeId(id);
 
@@ -174,149 +165,6 @@ const Page: React.FC = () => {
     setOpenCreate(true);
   };
     
-  
-  const sizeOptions = [
-    { value: '37', label: '37' },
-    { value: '38', label: '38' },
-    { value: '39', label: '39' },
-    { value: '40', label: '40' },
-    { value: '41', label: '41' },
-    { value: '42', label: '42' },
-    { value: '43', label: '43' },
-    { value: '44', label: '44' },
-    { value: '45', label: '45' },
-  ];
-  
-  const initValues: Shoe = {
-      id: '',
-      Name: '',
-      Price: 0,
-      ProductCode: '',
-      Size: [],
-      imageURL:'',
-  }
-
-  const formikCreate = useFormik({
-    initialValues: initValues,
-    onSubmit: async () => {
-      try {
-        await formikCreate.validateForm();
-    
-        let imageURL = null;
-        if (acceptedFiles.length > 0) {
-          const file = acceptedFiles[0];
-          const storageRef = ref(storage, `shoes/${uuidv4()}-${file.name}`);
-          try {
-              await uploadBytesResumable(storageRef, file);
-              imageURL = await getDownloadURL(storageRef);
-          } catch (error) {
-              console.log('error' , error);
-              return;
-          }
-        }
-        const newShoe = {
-          id: uuidv4(),
-          Name: formikCreate.values.Name,
-          Price: formikCreate.values.Price,
-          ProductCode: formikCreate.values.ProductCode,
-          Size: formikCreate.values.Size.map((s: any) => s.value),
-          imageURL: imageURL,
-        };
-        console.log(newShoe);
-        
-    
-        await addDoc(collection(db, 'shoes'), newShoe);
-    
-        dispatch(createShoe([...shoeData, newShoe]));
-        
-        formikCreate.resetForm(); 
-  
-        
-        setOpenCreate(false);
-        queryClient.invalidateQueries({ queryKey: ['shoes'] });
-        refetch()
-      } catch (error) {
-        console.error('Error creating shoe:', error);
-      }
-    },
-    enableReinitialize: true,
-    validationSchema: Yup.object().shape({
-      Name: Yup.string().required('Name is required'),
-      Price: Yup.number().required('Price is required'),
-      ProductCode: Yup.string().required('Product Code is required'),
-      Size: Yup.array().min(1, 'Please select at least one size'),
-    }),
-  });
-
-  const formikUpdate = useFormik({
-    initialValues: initValues,
-    onSubmit: async () => {
-      try {
-        await formikUpdate.validateForm();
-    
-        let imageURL = (shoeData.find((shoe) => shoe.id === selectedShoeId) as { id: string; imageURL: string })?.imageURL;
-        
-        let imageUrlOld = formikUpdate.values.imageURL;
-      
-          if (acceptedFiles.length > 0) {
-              const file = acceptedFiles[0];
-              const storageRef = ref(storage, `uploads/${uuidv4()}-${file.name}`);
-              try {
-                  if (imageUrlOld) {
-                      const oldImageRef = ref(storage, imageUrlOld);
-                      await deleteObject(oldImageRef);
-                  }
-      
-                  await uploadBytesResumable(storageRef, file);
-                  imageUrlOld = await getDownloadURL(storageRef); 
-      
-              } catch (error) {
-                  console.error("Lỗi khi xử lý ảnh:", error);
-                  return;
-              }
-          }
-  
-        const updatedShoe = {
-          id: selectedShoeId,
-          Name: formikUpdate.values.Name,
-          Price: formikUpdate.values.Price,
-          ProductCode: formikUpdate.values.ProductCode,
-          Size: formikUpdate.values.Size.map((s: any) => s.value),
-          imageURL,
-        };
-        
-    
-        console.log(updatedShoe);
-        
-        if (selectedShoeId !== null) {
-          await setDoc(doc(db, 'shoes', selectedShoeId), updatedShoe, { merge: true });
-        }  
-  
-        const updatedShoes = shoeData.map((shoe) => {
-          if (shoe.id === selectedShoeId) {
-            return updatedShoe as Shoe;
-          } else {
-            return shoe as Shoe;
-          }
-        });
-        
-        dispatch(updateShoe(updatedShoes));
-        formikUpdate.resetForm();
-        setOpenUpdate(false);
-        queryClient.invalidateQueries({ queryKey: ['shoes'] });
-        refetch()
-      } catch (error) {
-        console.error('Error updating shoe:', error);
-      }
-    },
-    enableReinitialize: true,
-    validationSchema: Yup.object().shape({
-      Name: Yup.string().required('Name is required'),
-      Price: Yup.number().required('Price is required'),
-      ProductCode: Yup.string().required('Product Code is required'),
-      Size: Yup.array().min(1, 'Please select at least one size'),
-    }),
-  });
 
   return (
     <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
@@ -358,167 +206,31 @@ const Page: React.FC = () => {
             />
             <MenuTable/>
         </Content>
-        <Modal
-        title="Add shoe"
-        visible={openCreate} 
-        confirmLoading={confirmLoading}
-        onCancel={() => {
-          setOpenCreate(false);
-        }}
-        
-        width={1000}
-      >
-        <Form  onFinish={formikCreate.handleSubmit} initialValues={formikCreate.initialValues}>
-        <Form.Item name="Name" label="Name">
-            <Input
-              name="Name"
-              value={formikCreate.values.Name}
-              onChange={formikCreate.handleChange}
-              onBlur={formikCreate.handleBlur}
-            />
-        </Form.Item>
-        {formikCreate.touched.Name && formikCreate.errors.Name ? <div className="error-message">{String(formikCreate.errors.Name)}</div> : null}
+        <AddShoeModal
+          title="Add shoe"
+          width={1000}
+          visible={openCreate}
+          onCancel={() => {
+            setOpenCreate(false);
+          }}
+          setOpenCreate={setOpenCreate}
+          refetch={refetch}
+          shoeData={shoeData}
 
-          <Form.Item name="Price" label="Price">
-          <Input
-              type='number'
-              name="Price"
-              value={formikCreate.values.Price}
-              onChange={formikCreate.handleChange}
-              onBlur={formikCreate.handleBlur}
-            />
-          </Form.Item>
-          {formikCreate.touched.Price && formikCreate.errors.Price ? (
-            <div className="error-message">{String(formikCreate.errors.Price)}</div>
-          ) : null} 
+        />
 
-          <Form.Item name="ProductCode" label="Product Code">
-            <Input 
-              value={formikCreate.values.ProductCode}
-              onChange={formikCreate.handleChange}
-              onBlur={formikCreate.handleBlur}/>
-          </Form.Item>
-          <Form.Item>
-          {formikCreate.touched.ProductCode && formikCreate.errors.ProductCode ? <div className="error-message">{String(formikCreate.errors.ProductCode)}</div> : null}
-
-          </Form.Item>
-          <Form.Item name="Size" label="Size" className='inputSelect'>
-            <Select
-              options={sizeOptions}
-              isMulti
-              name="size"
-              className="basic-multi-select inputSelect"
-              classNamePrefix="select"
-              value={formikCreate.values.Size}
-              onChange={(selectedOptions) => formikCreate.setFieldValue('Size', selectedOptions)}
-              onBlur={formikCreate.handleBlur}
-            />
-          </Form.Item>
-          {formikCreate.touched.Size && formikCreate.errors.Size ? <div className="error-message">{String(formikCreate.errors.Size)}</div> : null}
-
-
-          <Form.Item
-            name="image"
-            label="Image"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => e.fileList}
-            className='sm:max-w-64 fieldImage text-black mt-2'
-          >
-            <section className="input-file" style={{border: '1px solid black', height:'160px', position: 'relative', overflow: 'hidden'}}>
-                <div {...getRootProps({className: 'dropzone'})} className='upload-file'>
-                  <input {...getInputProps()} />
-                  <img src={uploadedImage || formikCreate.values.imageURL} className='renderImage'/>
-                  <p><UploadOutlined className='icon-file' /></p>
-                </div>
-              </section>
-          </Form.Item>
-
-          <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-          </Form.Item>
-        </Form>
-        </Modal>
-        <Modal
-        title="Update Shoe"
-        visible={openUpdate}
-        confirmLoading={confirmLoading}
-        onCancel={() => {
+      <UpdateShoeModal
+          title="Update Shoe"
+          visible={openUpdate}
+          refetch={refetch}
+          onCancel={() => {
           setOpenUpdate(false);
-          formikUpdate.resetForm({});
         }}
         width={1000}
-      >
-        <Form onFinish={formikUpdate.handleSubmit} initialValues={{...shoeData.find((shoe) => shoe.id === selectedShoeId)}} >
-        <Form.Item name="id" style={{ display: 'none' }}>
-          <Input type="hidden" />
-        </Form.Item>
-          <Form.Item name="Name" label="Name">
-            <Input
-              name="Name"
-              value={formikUpdate.values.Name}
-              onChange={formikUpdate.handleChange}
-              onBlur={formikUpdate.handleBlur}
-            />
-          </Form.Item>
-          {formikUpdate.touched.Name && formikUpdate.errors.Name ? <div className="error-message">{String(formikUpdate.errors.Name)}</div> : null}
-          <Form.Item name="Price" label="Price">
-            <InputNumber
-              name="Price"
-              type='number'
-              value={formikUpdate.values.Price}
-              onChange={(value) => formikUpdate.setFieldValue('Price', value)}
-              onBlur={formikUpdate.handleBlur}
-            />
-          </Form.Item>
-          {formikUpdate.touched.Price && formikUpdate.errors.Price ? <div className="error-message">{String(formikUpdate.errors.Price)}</div> : null}
-
-          <Form.Item name="ProductCode" label="Product Code">
-            <Input
-              value={formikUpdate.values.ProductCode}
-              onChange={formikUpdate.handleChange}
-              onBlur={formikUpdate.handleBlur}
-            />
-          </Form.Item>
-          {formikUpdate.touched.ProductCode && formikUpdate.errors.ProductCode ? <div className="error-message">{String(formikUpdate.errors.ProductCode)}</div> : null}
-
-          <Form.Item name="Size" label="Size" className='inputSelect'>
-            <Select
-              options={sizeOptions}
-              isMulti={true}
-              name="Size"
-              className="basic-multi-select inputSelect"
-              classNamePrefix="select"
-              value={formikUpdate.values.Size}
-              onChange={(selectedOptions) => formikUpdate.setFieldValue('Size', selectedOptions)}
-              onBlur={formikUpdate.handleBlur}
-            />
-          </Form.Item>
-          {formikUpdate.touched.Size && formikUpdate.errors.Size ? <div className="error-message">{String(formikUpdate.errors.Size)}</div> : null}
-
-          <Form.Item
-            name="image"
-            label="Image"
-            valuePropName="fileList"
-            getValueFromEvent={(e) => e.fileList}
-            className='sm:max-w-64 fieldImage text-black mt-2'
-          >
-            <section className="input-file" style={{border: '1px solid black', height:'160px', position: 'relative', overflow: 'hidden'}}>
-                <div {...getRootProps({className: 'dropzone'})} className='upload-file'>
-                  <input {...getInputProps()} />
-                  <img src={formikUpdate.values.imageURL} className='renderImage' />
-                  <p><UploadOutlined className='icon-file' /></p>
-                </div>
-            </section>
-          </Form.Item>
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </Modal>
+        setOpenUpdate={setOpenUpdate}
+        selectedShoeId={selectedShoeId}
+        shoeData={shoeData}
+        />
       </Layout>
     </Layout>
   );
