@@ -12,6 +12,7 @@ import { updateShoe } from '@/src/features/shoeSlice';
 import { useDispatch } from 'react-redux';
 import { QueryClient } from '@tanstack/react-query';
 import * as Yup from 'yup';
+import './UpdateShoeModal.scss'
 interface UpdateShoeModalProps {
   visible: boolean;
   onCancel: () => void;
@@ -45,7 +46,7 @@ const sizeOptions = [
     { value: '45', label: '45' },
   ];
   
-const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , selectedShoeId, shoeData, setOpenUpdate, refetch}) => {
+const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , selectedShoeId, shoeData, setOpenUpdate, }) => {
   const dispatch = useDispatch()
   const queryClient = new QueryClient()
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
@@ -68,16 +69,30 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
     Size: [],
     imageURL:'',
 }
-  
-  const formik = useFormik({
+useEffect(() => {
+  if (selectedShoeId) {
+    const selectedShoe = shoeData.find((shoe) => shoe.id === selectedShoeId) as Shoe;
+    
+    formikUpdate.setValues({
+      ...formikUpdate.values,
+      Name: selectedShoe.Name,
+      Price: selectedShoe.Price,
+      ProductCode: selectedShoe.ProductCode,
+      Size: selectedShoe.Size,
+      imageURL: selectedShoe.imageURL,
+    });
+  }
+}, [selectedShoeId, shoeData]);
+
+  const formikUpdate = useFormik({
     initialValues: initValues,
     onSubmit: async () => {
       try {
-        await formik.validateForm();
+        await formikUpdate.validateForm();
     
         let imageURL = (shoeData.find((shoe) => shoe.id === selectedShoeId) as { id: string; imageURL: string })?.imageURL;
         
-        let imageUrlOld = formik.values.imageURL;
+        let imageUrlOld = formikUpdate.values.imageURL;
       
           if (acceptedFiles.length > 0) {
               const file = acceptedFiles[0];
@@ -99,16 +114,14 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
 
         const updatedShoe = {
           id: selectedShoeId,
-          Name: formik.values.Name,
-          Price: formik.values.Price,
-          ProductCode: formik.values.ProductCode,
-          Size: formik.values.Size.map((s: any) => s.value),
+          Name: formikUpdate.values.Name,
+          Price: formikUpdate.values.Price,
+          ProductCode: formikUpdate.values.ProductCode,
+          Size: formikUpdate.values.Size.map((s: any) => s.value),
           imageURL,
         };
         
-    
-        console.log(updatedShoe);
-        
+            
         if (selectedShoeId !== null) {
           await setDoc(doc(db, 'shoes', selectedShoeId), updatedShoe, { merge: true });
         }  
@@ -122,10 +135,9 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
         });
         
         dispatch(updateShoe(updatedShoes));
-        formik.resetForm();
+        formikUpdate.resetForm();
         setOpenUpdate(false);
         queryClient.invalidateQueries({ queryKey: ['shoes'] });
-        refetch()
       } catch (error) {
         console.error('Error updating shoe:', error);
       }
@@ -142,57 +154,57 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
 
   return (
     <Modal title="Update Shoe" visible={visible} onCancel={onCancel} width={1000}>
-      <Form onFinish={formik.handleSubmit} initialValues={{ ...formik.values }}>
+      <Form onFinish={formikUpdate.handleSubmit} initialValues={{ ...formikUpdate.values }}>
         <Form.Item name="id" style={{ display: 'none' }}>
           <Input type="hidden" />
         </Form.Item>
-        <Form.Item name="Name" label="Name">
+        <Form.Item name="Name" label="Name" className='text-black'> 
           <Input
             name="Name"
-            value={formik.values.Name}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            value={formikUpdate.values.Name}
+            onChange={formikUpdate.handleChange}
+            onBlur={formikUpdate.handleBlur}
           />
         </Form.Item>
-        {formik.touched.Name && formik.errors.Name ? (
-          <div className="error-message">{String(formik.errors.Name)}</div>
+        {formikUpdate.touched.Name && formikUpdate.errors.Name ? (
+          <div className="error-message">{String(formikUpdate.errors.Name)}</div>
         ) : null}
-        <Form.Item name="Price" label="Price">
+        <Form.Item name="Price" label="Price"  className='text-black'>
           <InputNumber
             name="Price"
             type="number"
-            value={formik.values.Price}
-            onChange={(value) => formik.setFieldValue('Price', value)}
-            onBlur={formik.handleBlur}
+            value={formikUpdate.values.Price}
+            onChange={(value) => formikUpdate.setFieldValue('Price', value)}
+            onBlur={formikUpdate.handleBlur}
           />
         </Form.Item>
-        {formik.touched.Price && formik.errors.Price ? (
-          <div className="error-message">{String(formik.errors.Price)}</div>
+        {formikUpdate.touched.Price && formikUpdate.errors.Price ? (
+          <div className="error-message">{String(formikUpdate.errors.Price)}</div>
         ) : null}
-        <Form.Item name="ProductCode" label="Product Code">
+        <Form.Item name="ProductCode" label="Product Code"  className='text-black' >
           <Input
-            value={formik.values.ProductCode}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
+            value={formikUpdate.values.ProductCode}
+            onChange={formikUpdate.handleChange}
+            onBlur={formikUpdate.handleBlur}
           />
         </Form.Item>
-        {formik.touched.ProductCode && formik.errors.ProductCode ? (
-          <div className="error-message">{String(formik.errors.ProductCode)}</div>
+        {formikUpdate.touched.ProductCode && formikUpdate.errors.ProductCode ? (
+          <div className="error-message">{String(formikUpdate.errors.ProductCode)}</div>
         ) : null}
-        <Form.Item name="Size" label="Size" className="inputSelect">
+        <Form.Item name="Size" label="Size" className="inputSelect text-black">
           <Select
             options={sizeOptions}
             isMulti={true}
             name="Size"
             className="basic-multi-select inputSelect"
             classNamePrefix="select"
-            value={formik.values.Size}
-            onChange={(selectedOptions: any) => formik.setFieldValue('Size', selectedOptions)}
-            onBlur={formik.handleBlur}
+            value={formikUpdate.values.Size}
+            onChange={(selectedOptions: any) => formikUpdate.setFieldValue('Size', selectedOptions)}
+            onBlur={formikUpdate.handleBlur}
           />
         </Form.Item>
-        {formik.touched.Size && formik.errors.Size ? (
-          <div className="error-message">{String(formik.errors.Size)}</div>
+        {formikUpdate.touched.Size && formikUpdate.errors.Size ? (
+          <div className="error-message">{String(formikUpdate.errors.Size)}</div>
         ) : null}
         <Form.Item
           name="image"
@@ -216,9 +228,8 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
             >
               <input {...getInputProps()} />
               <img
-                src={uploadedImage || formik.values.imageURL}
+                src={uploadedImage || formikUpdate.values.imageURL}
                 className="renderImage"
-                alt="Uploaded shoe"
               />
               <p>
                 <UploadOutlined className="icon-file" />

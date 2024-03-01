@@ -100,10 +100,10 @@ const Page: React.FC = () => {
   ];
 
   
+  const [confirmLoading, setConfirmLoading] = useState(false);
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [selectedShoeId, setSelectedShoeId] = useState<string | null>(null);
-
 
   const {data: shoeData = [], isError, isLoading , refetch  } = useQuery({
     queryKey: ['shoes'],  
@@ -164,7 +164,6 @@ const Page: React.FC = () => {
   const showModalCreate = () => {
     setOpenCreate(true);
   };
-    
 
   return (
     <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
@@ -209,12 +208,12 @@ const Page: React.FC = () => {
         <AddShoeModal
           title="Add shoe"
           width={1000}
+          refetch={refetch}
           visible={openCreate}
           onCancel={() => {
             setOpenCreate(false);
           }}
           setOpenCreate={setOpenCreate}
-          refetch={refetch}
           shoeData={shoeData}
 
         />
@@ -225,6 +224,7 @@ const Page: React.FC = () => {
           refetch={refetch}
           onCancel={() => {
           setOpenUpdate(false);
+          // formikUpdate.resetForm({});
         }}
         width={1000}
         setOpenUpdate={setOpenUpdate}

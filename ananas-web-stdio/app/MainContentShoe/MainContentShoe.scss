@@ -8,7 +8,7 @@
       max-width: 100px;
     }
     .inputSelect{
-      max-width: 100%;
+      max-width: 30vh;
     }
 }
 
@@ -17,7 +17,7 @@
     max-width: 100%;
   }
   .inputSelect{
-    max-width: 40vh !important;
+    max-width: 100% !important;
   }
   .basic-multi-select{
     max-width: 40vh !important;
@@ -100,4 +100,49 @@
 }
 .renderImage{
   width: "100%"; height: "100%"; object-fit: 'cover';position: 'absolute'; top: '0';left: '0'
+}
+.ant-form-item-label[for="Name"] label {
+  color: black !important;
+  max-width: 100vh;
+  width: 50px;
+} 
+label[for="Name"] {
+  width: 50px;
+  color: black; /* Add any other styles you need */
+}
+
+/* Alternatively, use a more specific selector with the parent class */
+.ant-form-item-label[for="Name"] label {
+  width: 50px;
+  color: black; /* Add any other styles you need */
+}
+
+/* If the styles need to be applied to a specific class */
+.ant-col.ant-form-item-label[for="Name"] label {
+  width: 50px;
+  color: black; /* Add any other styles you need */
+}
+
+.ant-row.ant-form-item-row label[for="Price"] {
+  color: black !important;
+  max-width: 100vh;
+  width: 50px;
+}
+
+/* Styles for the "ProductCode" field */
+.ant-row.ant-form-item-row label[for="ProductCode"] {
+  color: black !important;
+  max-width: 100vh;
+  width: 100px;
+}
+
+.ant-row.ant-form-item-row label[for="Size"] {
+  color: black !important;
+  max-width: 100vh;
+  width: 50px;
+}
+.ant-row.ant-form-item-row label[for="image"] {
+  color: black !important;
+  max-width: 100vh;
+  width: 50px;
 }

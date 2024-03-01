@@ -1,0 +1,138 @@
+.content-table-update {
+    padding: 5px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+
+.header-table-update {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+}
+
+.content-header-update {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.link-icon-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+}
+
+.back-icon {
+    color: #000;
+
+    &:hover {
+        color: #fff;
+    }
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.input-field {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+.btn {
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10px;
+    padding: 0px 10px;
+    border: 2px solid black;
+    background-color: white;
+    color: #000;
+
+    &.primary {
+        padding: 7px 13px;
+        border-color: #3293de;
+        color: #3293de;
+
+        &:hover {
+            background-color:#3293de;
+            color: white;
+        }
+    }
+}
+.input-file{
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    height: 160px;
+    width: 160px;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+.upload-file{
+    text-align: center;
+}
+.icon-file{
+    font-size: 100px !important;
+}
+.form-create{
+    display: flex;
+}
+/* Default styles for mobile devices */
+.row-input {
+    width: 50%;
+    padding: 10px;
+}
+
+.section-row {
+    width: 50%;
+    padding: 10px;
+    margin-top: 10px;
+    display: flex;           /* Enables flexbox for the container */
+    justify-content: center; /* Horizontally centers the child/children */
+    align-items: center;     /* Vertically centers the child/children */
+}
+
+
+/* Styles for larger screens (desktops, laptops) */
+@media (min-width: 768px) {
+    .row-input {
+        width: 70%;
+    }
+
+    .section-row {
+        width: 30%;
+    }
+}
+.ant-form-item-label[for="Name"] label {
+    color: black !important;
+    max-width: 100vh;
+    width: 50px;
+} 
+label[for="Name"] {
+    width: 50px;
+    color: black; /* Add any other styles you need */
+}
+
+/* Alternatively, use a more specific selector with the parent class */
+.ant-form-item-label[for="Name"] label {
+    width: 50px;
+    color: black; /* Add any other styles you need */
+}
+
+/* If the styles need to be applied to a specific class */
+.ant-col.ant-form-item-label[for="Name"] label {
+    width: 50px;
+    color: black; /* Add any other styles you need */
+}
