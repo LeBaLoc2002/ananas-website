@@ -79,7 +79,7 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
           Name: selectedShoe?.Name,
           Price: selectedShoe?.Price,
           ProductCode: selectedShoe?.ProductCode,
-          Size: selectedShoe.Size.map((size : any) => ({ value: size, label: size })),
+          Size: selectedShoe?.Size.map((size : any) => ({ value: size, label: size })),
           imageURL: selectedShoe?.imageURL,
         });
         formikUpdate.setFieldValue('imageURL', selectedShoe?.imageURL || '');
