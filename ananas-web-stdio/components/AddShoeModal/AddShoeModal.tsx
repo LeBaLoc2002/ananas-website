@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Form, Button, Input, InputNumber } from 'antd';
 import { useDropzone } from 'react-dropzone';
 import { UploadOutlined } from '@ant-design/icons';
@@ -59,6 +59,9 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
     },
   });
 
+
+  
+
   const initValues: Shoe = {
     id: '',
     Name: '',
@@ -68,48 +71,70 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
     imageURL: '',
   }
 
-  const formik = useFormik({
-    initialValues: initValues,
-    onSubmit: async (values) => {
+  const handleImageUpload = async () => {
+    let imageURL = null;
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      const storageRef = ref(storage, `shoes/${uuidv4()}-${file.name}`);
       try {
-        await formik.validateForm();
-
-        let imageURL = null;
-        if (acceptedFiles.length > 0) {
-          const file = acceptedFiles[0];
-          const storageRef = ref(storage, `shoes/${uuidv4()}-${file.name}`);
-          try {
-            await uploadBytesResumable(storageRef, file);
-            imageURL = await getDownloadURL(storageRef);
-          } catch (error) {
-            console.log('error', error);
-            return;
-          }
-        }
-        const newShoe = {
-          id: uuidv4(),
-          Name: values.Name,
-          Price: values.Price,
-          ProductCode: values.ProductCode,
-          Size: values.Size.map((s: any) => s.value),
-          imageURL: imageURL,
-        };
-
-        await addDoc(collection(db, 'shoes'), newShoe);
-
-        dispatch(createShoe([...shoeData, newShoe]));
-
-        formik.setValues(initValues);
-        console.log(initValues);
-
-        setOpenCreate(false);
-        queryClient.invalidateQueries({ queryKey: ['shoes'] });
-        refetch()
+        await uploadBytesResumable(storageRef, file);
+        imageURL = await getDownloadURL(storageRef);
       } catch (error) {
-        console.error('Error creating shoe:', error);
+        console.log('error', error);
+        return null;
       }
-    },
-    enableReinitialize: false,
+    }
+    return imageURL;
+  };
+
+  const submitShoeData = async (imageURL: string | null) => {
+    const newShoe = {
+      id: uuidv4(),
+      Name: formik.values.Name,
+      Price: formik.values.Price,
+      ProductCode: formik.values.ProductCode,
+      Size: formik.values.Size.map((s: any) => s.value),
+      imageURL: imageURL,
+    };
+  
+    try {
+      await addDoc(collection(db, 'shoes'), newShoe);
+      dispatch(createShoe([...shoeData, newShoe]));
+      console.log('Before reset:', formik.values);
+      formik.resetForm();
+      formik.setValues(initValues);
+      console.log('After reset:', formik.values);
+  
+      setOpenCreate(false);
+  
+      queryClient.invalidateQueries({ queryKey: ['shoes'] });
+      refetch();
+    } catch (firestoreError) {
+      console.error('Error adding shoe to Firestore:', firestoreError);
+      throw firestoreError;
+    }
+  };
+  
+  const submitFormCreate = async () => {
+    try {
+      await formik.validateForm();
+      const imageURL = await handleImageUpload();
+      await submitShoeData(imageURL);
+    } catch (error) {
+      console.error('Error creating shoe:', error);
+    }
+  };
+  
+  
+  
+  const handleSubmit = async () => {
+    await submitFormCreate();
+  };
+
+  const formik = useFormik({
+    enableReinitialize: true,
+    initialValues: initValues,
+    onSubmit: handleSubmit,
     validationSchema: Yup.object().shape({
       Name: Yup.string().required('Name is required'),
       Price: Yup.number().required('Price is required'),
@@ -120,9 +145,8 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
 
   return (
     <Modal title="Add shoe" visible={visible} onCancel={onCancel} width={1000}>
-      <Form
-        onFinish={formik.handleSubmit}
-        initialValues={initValues}
+      <form
+        onSubmit={formik.handleSubmit}
       >
         <Form.Item name="Name" label="Name" style={{ width: '53px' , color:'black' }}>
           <Input
@@ -208,7 +232,7 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
             Submit
           </Button>
         </Form.Item>
-      </Form>
+      </form>
     </Modal>
   );
 };

@@ -212,6 +212,7 @@ const Page: React.FC = () => {
           visible={openCreate}
           onCancel={() => {
             setOpenCreate(false);
+            
           }}
           setOpenCreate={setOpenCreate}
           shoeData={shoeData}

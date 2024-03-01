@@ -68,80 +68,81 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
     ProductCode: '',
     Size: [],
     imageURL:'',
-}
-useEffect(() => {
-  if (selectedShoeId) {
-    const selectedShoe = shoeData.find((shoe) => shoe.id === selectedShoeId) as Shoe;
-    
-    formikUpdate.setValues({
-      ...formikUpdate.values,
-      Name: selectedShoe.Name,
-      Price: selectedShoe.Price,
-      ProductCode: selectedShoe.ProductCode,
-      Size: selectedShoe.Size,
-      imageURL: selectedShoe.imageURL,
-    });
-  }
-}, [selectedShoeId, shoeData]);
+  } 
+  useEffect(() => {
+    if (selectedShoeId) {
+      const selectedShoe = shoeData.find((shoe) => shoe.id === selectedShoeId) as Shoe;
 
+      formikUpdate.setValues((prevValues) => ({
+        ...prevValues,
+        Name: selectedShoe?.Name,
+        Price: selectedShoe?.Price,
+        ProductCode: selectedShoe?.ProductCode,
+        Size: selectedShoe?.Size,
+        imageURL: selectedShoe?.imageURL 
+      }));
+    }
+  }, [selectedShoeId, shoeData]);
+
+
+
+  const handleUpdateImageUpload = async () => {
+    let imageURL = (shoeData.find((shoe) => shoe.id === selectedShoeId) as { id: string; imageURL: string })?.imageURL;
+    let imageUrlOld = formikUpdate.values.imageURL;
+  
+    if (acceptedFiles.length > 0) {
+      const file = acceptedFiles[0];
+      const storageRef = ref(storage, `uploads/${uuidv4()}-${file.name}`);
+      try {
+        if (imageUrlOld) {
+          const oldImageRef = ref(storage, imageUrlOld);
+          await deleteObject(oldImageRef);
+        }
+  
+        await uploadBytesResumable(storageRef, file);
+        imageURL = await getDownloadURL(storageRef);
+  
+      } catch (error) {
+        console.error("Error processing image:", error);
+        return null;
+      }
+    }
+    return imageURL;
+  };
+  
+  const submitFormUpdate = async () => {
+    try {
+      await formikUpdate.validateForm();
+  
+      const imageURL = await handleUpdateImageUpload();
+  
+      const updatedShoe = {
+        id: selectedShoeId,
+        Name: formikUpdate.values.Name,
+        Price: formikUpdate.values.Price,
+        ProductCode: formikUpdate.values.ProductCode,
+        Size: formikUpdate.values.Size.map((s: any) => s.value),
+        imageURL,
+      };
+  
+      if (selectedShoeId !== null) {
+        await setDoc(doc(db, 'shoes', selectedShoeId), updatedShoe, { merge: true });
+      }
+  
+      const updatedShoes = shoeData.map((shoe) => (shoe.id === selectedShoeId ? updatedShoe as Shoe : shoe as Shoe));
+  
+      dispatch(updateShoe(updatedShoes));
+      formikUpdate.resetForm();
+      setOpenUpdate(false);
+      queryClient.invalidateQueries({ queryKey: ['shoes'] });
+    } catch (error) {
+      console.error('Error updating shoe:', error);
+    }
+  };
+  
   const formikUpdate = useFormik({
     initialValues: initValues,
-    onSubmit: async () => {
-      try {
-        await formikUpdate.validateForm();
-    
-        let imageURL = (shoeData.find((shoe) => shoe.id === selectedShoeId) as { id: string; imageURL: string })?.imageURL;
-        
-        let imageUrlOld = formikUpdate.values.imageURL;
-      
-          if (acceptedFiles.length > 0) {
-              const file = acceptedFiles[0];
-              const storageRef = ref(storage, `uploads/${uuidv4()}-${file.name}`);
-              try {
-                  if (imageUrlOld) {
-                      const oldImageRef = ref(storage, imageUrlOld);
-                      await deleteObject(oldImageRef);
-                  }
-      
-                  await uploadBytesResumable(storageRef, file);
-                  imageUrlOld = await getDownloadURL(storageRef); 
-      
-              } catch (error) {
-                  console.error("Lỗi khi xử lý ảnh:", error);
-                  return;
-              }
-          }
-
-        const updatedShoe = {
-          id: selectedShoeId,
-          Name: formikUpdate.values.Name,
-          Price: formikUpdate.values.Price,
-          ProductCode: formikUpdate.values.ProductCode,
-          Size: formikUpdate.values.Size.map((s: any) => s.value),
-          imageURL,
-        };
-        
-            
-        if (selectedShoeId !== null) {
-          await setDoc(doc(db, 'shoes', selectedShoeId), updatedShoe, { merge: true });
-        }  
-
-        const updatedShoes = shoeData.map((shoe) => {
-          if (shoe.id === selectedShoeId) {
-            return updatedShoe as Shoe;
-          } else {
-            return shoe as Shoe;
-          }
-        });
-        
-        dispatch(updateShoe(updatedShoes));
-        formikUpdate.resetForm();
-        setOpenUpdate(false);
-        queryClient.invalidateQueries({ queryKey: ['shoes'] });
-      } catch (error) {
-        console.error('Error updating shoe:', error);
-      }
-    },
+    onSubmit: submitFormUpdate,
     enableReinitialize: true,
     validationSchema: Yup.object().shape({
       Name: Yup.string().required('Name is required'),
@@ -150,7 +151,7 @@ useEffect(() => {
       Size: Yup.array().min(1, 'Please select at least one size'),
     }),
   });
-
+  
 
   return (
     <Modal title="Update Shoe" visible={visible} onCancel={onCancel} width={1000}>
