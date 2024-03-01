@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Form, Button, Input, InputNumber } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { Modal, Form, Button, Input, InputNumber, FormInstance } from 'antd';
 import { useDropzone } from 'react-dropzone';
 import { UploadOutlined } from '@ant-design/icons';
 import Select from 'react-select';
@@ -46,10 +46,11 @@ const sizeOptions = [
     { value: '45', label: '45' },
   ];
   
-const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , selectedShoeId, shoeData, setOpenUpdate, }) => {
+const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , selectedShoeId, shoeData, setOpenUpdate,refetch }) => {
   const dispatch = useDispatch()
   const queryClient = new QueryClient()
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const formRefUpdate = useRef<FormInstance | null>(null); 
 
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
@@ -73,14 +74,16 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
     if (selectedShoeId) {
       const selectedShoe = shoeData.find((shoe) => shoe.id === selectedShoeId) as Shoe;
 
-      formikUpdate.setValues((prevValues) => ({
-        ...prevValues,
-        Name: selectedShoe?.Name,
-        Price: selectedShoe?.Price,
-        ProductCode: selectedShoe?.ProductCode,
-        Size: selectedShoe?.Size,
-        imageURL: selectedShoe?.imageURL 
-      }));
+      if (formRefUpdate.current) {
+          formRefUpdate.current.setFieldsValue({
+          Name: selectedShoe?.Name,
+          Price: selectedShoe?.Price,
+          ProductCode: selectedShoe?.ProductCode,
+          Size: selectedShoe.Size.map((size : any) => ({ value: size, label: size })),
+          imageURL: selectedShoe?.imageURL,
+        });
+        formikUpdate.setFieldValue('imageURL', selectedShoe?.imageURL || '');
+      }
     }
   }, [selectedShoeId, shoeData]);
 
@@ -135,6 +138,7 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
       formikUpdate.resetForm();
       setOpenUpdate(false);
       queryClient.invalidateQueries({ queryKey: ['shoes'] });
+      refetch()
     } catch (error) {
       console.error('Error updating shoe:', error);
     }
@@ -155,7 +159,7 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
 
   return (
     <Modal title="Update Shoe" visible={visible} onCancel={onCancel} width={1000}>
-      <Form onFinish={formikUpdate.handleSubmit} initialValues={{ ...formikUpdate.values }}>
+      <Form ref={formRefUpdate} onFinish={formikUpdate.handleSubmit} initialValues={{ ...formikUpdate.values }}>
         <Form.Item name="id" style={{ display: 'none' }}>
           <Input type="hidden" />
         </Form.Item>

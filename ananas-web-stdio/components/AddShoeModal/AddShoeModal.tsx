@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { Modal, Form, Button, Input, InputNumber } from 'antd';
+import React, { useEffect, useRef, useState } from 'react';
+import { Modal, Form, Button, Input, InputNumber, FormInstance } from 'antd';
 import { useDropzone } from 'react-dropzone';
 import { UploadOutlined } from '@ant-design/icons';
 import Select from 'react-select';
@@ -58,9 +58,7 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
       setUploadedImage(imageUrl)
     },
   });
-
-
-  
+  const formRef = useRef<FormInstance | null>(null); 
 
   const initValues: Shoe = {
     id: '',
@@ -100,10 +98,8 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
     try {
       await addDoc(collection(db, 'shoes'), newShoe);
       dispatch(createShoe([...shoeData, newShoe]));
-      console.log('Before reset:', formik.values);
+
       formik.resetForm();
-      formik.setValues(initValues);
-      console.log('After reset:', formik.values);
   
       setOpenCreate(false);
   
@@ -120,34 +116,37 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
       await formik.validateForm();
       const imageURL = await handleImageUpload();
       await submitShoeData(imageURL);
+      if (formRef.current) {
+        formRef.current.resetFields();
+        setUploadedImage(null); 
+      }
+
     } catch (error) {
       console.error('Error creating shoe:', error);
     }
   };
   
-  
-  
   const handleSubmit = async () => {
     await submitFormCreate();
   };
+  const validationSchema = Yup.object().shape({
+    Name: Yup.string().required('Name is required'),
+    Price: Yup.number().required('Price is required'),
+    ProductCode: Yup.string().required('Product Code is required'),
+    Size: Yup.array().min(1, 'Please select at least one size'),
+  }); 
+
 
   const formik = useFormik({
     enableReinitialize: true,
     initialValues: initValues,
     onSubmit: handleSubmit,
-    validationSchema: Yup.object().shape({
-      Name: Yup.string().required('Name is required'),
-      Price: Yup.number().required('Price is required'),
-      ProductCode: Yup.string().required('Product Code is required'),
-      Size: Yup.array().min(1, 'Please select at least one size'),
-    }),
+    validationSchema: validationSchema
   });
 
   return (
     <Modal title="Add shoe" visible={visible} onCancel={onCancel} width={1000}>
-      <form
-        onSubmit={formik.handleSubmit}
-      >
+      <Form ref={formRef} onFinish={formik.handleSubmit}>
         <Form.Item name="Name" label="Name" style={{ width: '53px' , color:'black' }}>
           <Input
             name="Name"
@@ -232,7 +231,7 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
             Submit
           </Button>
         </Form.Item>
-      </form>
+      </Form>
     </Modal>
   );
 };

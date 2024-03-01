@@ -149,11 +149,6 @@ const Page: React.FC = () => {
     const selectedShoe: any = shoeData.find((shoe) => shoe.id === id);
     console.log(selectedShoe);
     
-    // await formikUpdate.setValues({
-    //   ...selectedShoe,
-    //   Size: selectedShoe.Size.map((size : any) => ({ value: size, label: size }))      
-    // });
-    
     setSelectedShoeId(id);
 
     setOpenUpdate(true);
