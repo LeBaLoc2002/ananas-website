@@ -1,7 +1,7 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Modal, Form, Button, Input, InputNumber, FormInstance } from 'antd';
 import { useDropzone } from 'react-dropzone';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined , LoadingOutlined} from '@ant-design/icons';
 import Select from 'react-select';
 import { v4 as uuidv4 } from 'uuid';
 import './AddShoeModal.scss'
@@ -50,7 +50,7 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const dispatch = useDispatch()
   const queryClient = new QueryClient()
-
+  const [loading, setLoading] = useState(false);
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
@@ -80,7 +80,7 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
       } catch (error) {
         toast.error('Lỗi xảy ra!', {
           position: "top-right",
-          autoClose: 5000,
+          autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: true,
         });
@@ -91,6 +91,7 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
   };
 
   const submitShoeData = async (imageURL: string | null) => {
+    setLoading(true);
     const newShoe = {
       id: uuidv4(),
       Name: formik.values.Name,
@@ -106,7 +107,7 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
 
       toast.success('Thành công!', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
       });
@@ -118,11 +119,13 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
     } catch (firestoreError) {
       toast.error('Lỗi xảy ra!', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
       });
       throw firestoreError;
+    }finally{
+      setLoading(false); 
     }
   };
   
@@ -139,7 +142,7 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
     } catch (error) {
       toast.error('Lỗi xảy ra!', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
       });    }
@@ -150,7 +153,11 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
   };
   const validationSchema = Yup.object().shape({
     Name: Yup.string().required('Name is required'),
-    Price: Yup.number().required('Price is required'),
+    Price: Yup.number()
+    .typeError('Price must be a number')
+    .required('Price is required')
+    .min(1000000, 'Minimum price is 1,000,000 VND')
+    .max(100000000, 'Maximum price is 100,000,000 VND'),
     ProductCode: Yup.string().required('Product Code is required'),
     Size: Yup.array().min(1, 'Please select at least one size'),
   }); 
@@ -166,7 +173,10 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
   return (
     <Modal title="Add shoe" visible={visible} onCancel={onCancel} width={1000}>
       <Form ref={formRef} onFinish={formik.handleSubmit}>
-        <Form.Item name="Name" label="Name" style={{ width: '53px' , color:'black' }}>
+      {formik.touched.Name && formik.errors.Name ? (
+          <div className="error-message">{String(formik.errors.Name)}</div>
+        ) : null}
+        <Form.Item name="Name" label="Name" style={{ width: '53px' , color:'black' }}  >
           <Input
             name="Name"
             value={formik.values.Name}
@@ -174,8 +184,8 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
             onBlur={formik.handleBlur}
           />
         </Form.Item>
-        {formik.touched.Name && formik.errors.Name ? (
-          <div className="error-message">{String(formik.errors.Name)}</div>
+        {formik.touched.Price && formik.errors.Price ? (
+          <div className="error-message">{String(formik.errors.Price)}</div>
         ) : null}
         <Form.Item name="Price" label="Price">
           <InputNumber
@@ -186,8 +196,8 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
             onBlur={formik.handleBlur}
           />
         </Form.Item>
-        {formik.touched.Price && formik.errors.Price ? (
-          <div className="error-message">{String(formik.errors.Price)}</div>
+        {formik.touched.ProductCode && formik.errors.ProductCode ? (
+          <div className="error-message">{String(formik.errors.ProductCode)}</div>
         ) : null}
         <Form.Item name="ProductCode" label="Product Code">
           <Input
@@ -196,8 +206,8 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
             onBlur={formik.handleBlur}
           />
         </Form.Item>
-        {formik.touched.ProductCode && formik.errors.ProductCode ? (
-          <div className="error-message">{String(formik.errors.ProductCode)}</div>
+        {formik.touched.Size && formik.errors.Size ? (
+          <div className="error-message">{String(formik.errors.Size)}</div>
         ) : null}
         <Form.Item name="Size" label="Size" className="inputSelect">
           <Select
@@ -211,9 +221,6 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
             onBlur={formik.handleBlur}
           />
         </Form.Item>
-        {formik.touched.Size && formik.errors.Size ? (
-          <div className="error-message">{String(formik.errors.Size)}</div>
-        ) : null}
         <Form.Item
           name="image"
           label="Image"
@@ -246,8 +253,8 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
           </section>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
+        <Button type="primary" htmlType="submit" disabled={loading} icon={loading && <LoadingOutlined />}> 
+                Submit
           </Button>
         </Form.Item>
       </Form>

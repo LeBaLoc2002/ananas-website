@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Modal, Form, Button, Input, InputNumber, FormInstance } from 'antd';
 import { useDropzone } from 'react-dropzone';
-import { UploadOutlined } from '@ant-design/icons';
+import { UploadOutlined , LoadingOutlined} from '@ant-design/icons';
 import Select from 'react-select';
 import { v4 as uuidv4 } from 'uuid';
 import { useFormik } from 'formik';
@@ -53,7 +53,17 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
   const queryClient = new QueryClient()
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const formRefUpdate = useRef<FormInstance | null>(null); 
+  const [loading, setLoading] = useState(false);
 
+  const [initialFormValues, setInitialFormValues] = useState<Shoe>({
+    id: '',
+    Name: '',
+    Price: 0,
+    ProductCode: '',
+    Size: [],
+    imageURL: '',
+  });
+  
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
       const file = acceptedFiles[0];
@@ -63,21 +73,12 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
   });
 
 
-  const initValues: Shoe = {
-    id: '',
-    Name: '',
-    Price: 0,
-    ProductCode: '',
-    Size: [],
-    imageURL:'',
-  } 
-  
- const fetchOldData = async () => {
+  const fetchOldData = async () => {
     if (selectedShoeId) {
       try {
         const docSnap = await getDoc(doc(db, 'shoes', selectedShoeId));
         const oldShoeData = docSnap.data() as Shoe;
-
+  
         if (formRefUpdate.current) {
           formRefUpdate.current.setFieldsValue({
             Name: oldShoeData?.Name,
@@ -86,18 +87,24 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
             Size: oldShoeData?.Size.map((size: any) => ({ value: size, label: size })),
             imageURL: oldShoeData?.imageURL,
           });
+  
+          formikUpdate.setFieldValue('Name', oldShoeData?.Name || '');
+          formikUpdate.setFieldValue('Price', oldShoeData?.Price || '');
+          formikUpdate.setFieldValue('Size', oldShoeData?.Size.map((size: any) => ({ value: size, label: size })) || '');
+          formikUpdate.setFieldValue('ProductCode', oldShoeData?.ProductCode || '');
           formikUpdate.setFieldValue('imageURL', oldShoeData?.imageURL || '');
-        }
+       }
       } catch (error) {
         toast.error('Lỗi xảy ra!', {
           position: "top-right",
-          autoClose: 5000,
+          autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: true,
-        });      
+        });
       }
     }
   };
+  
 
   useEffect(() => {
     fetchOldData();
@@ -124,7 +131,7 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
       } catch (error) {
         toast.error('Lỗi xảy ra!', {
           position: "top-right",
-          autoClose: 5000,
+          autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: true,
         });
@@ -136,7 +143,7 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
   
   const submitFormUpdate = async () => {
     try {
-      
+      setLoading(true)
       await formikUpdate.validateForm();
       
       const imageURL = await handleUpdateImageUpload();
@@ -159,10 +166,11 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
       dispatch(updateShoe(updatedShoes));
       toast.success('Thành công!', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
       });
+
       formikUpdate.resetForm();
       setOpenUpdate(false);
       queryClient.invalidateQueries({ queryKey: ['shoes'] });
@@ -170,22 +178,28 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
     } catch (error) {
       toast.error('Error updating shoe!', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
       });
+    }finally{
+      setLoading(false)
     }
   };
 
   const validationSchema = Yup.object().shape({
     Name: Yup.string().required('Name is required'),
-    Price: Yup.number().required('Price is required'),
+   Price: Yup.number()
+    .typeError('Price must be a number')
+    .required('Price is required')
+    .min(1000000, 'Minimum price is 1,000,000 VND')
+    .max(100000000, 'Maximum price is 100,000,000 VND'),
     ProductCode: Yup.string().required('Product Code is required'),
     Size: Yup.array().min(1, 'Please select at least one size'),
   }); 
 
   const formikUpdate = useFormik({
-    initialValues: initValues,
+    initialValues: initialFormValues,
     onSubmit: submitFormUpdate,
     enableReinitialize: true,
     validationSchema: validationSchema
@@ -198,6 +212,9 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
         <Form.Item name="id" style={{ display: 'none' }}>
           <Input type="hidden" />
         </Form.Item>
+        {formikUpdate.touched.Name && formikUpdate.errors.Name ? (
+          <div className="error-message">{String(formikUpdate.errors.Name)}</div>
+        ) : null}
         <Form.Item name="Name" label="Name" className='text-black'> 
           <Input
             name="Name"
@@ -206,8 +223,8 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
             onBlur={formikUpdate.handleBlur}
           />
         </Form.Item>
-        {formikUpdate.touched.Name && formikUpdate.errors.Name ? (
-          <div className="error-message">{String(formikUpdate.errors.Name)}</div>
+        {formikUpdate.touched.Price && formikUpdate.errors.Price ? (
+          <div className="error-message">{String(formikUpdate.errors.Price)}</div>
         ) : null}
         <Form.Item name="Price" label="Price"  className='text-black'>
           <InputNumber
@@ -218,8 +235,8 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
             onBlur={formikUpdate.handleBlur}
           />
         </Form.Item>
-        {formikUpdate.touched.Price && formikUpdate.errors.Price ? (
-          <div className="error-message">{String(formikUpdate.errors.Price)}</div>
+        {formikUpdate.touched.ProductCode && formikUpdate.errors.ProductCode ? (
+          <div className="error-message">{String(formikUpdate.errors.ProductCode)}</div>
         ) : null}
         <Form.Item name="ProductCode" label="Product Code"  className='text-black' >
           <Input
@@ -228,8 +245,8 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
             onBlur={formikUpdate.handleBlur}
           />
         </Form.Item>
-        {formikUpdate.touched.ProductCode && formikUpdate.errors.ProductCode ? (
-          <div className="error-message">{String(formikUpdate.errors.ProductCode)}</div>
+        {formikUpdate.touched.Size && formikUpdate.errors.Size ? (
+          <div className="error-message">{String(formikUpdate.errors.Size)}</div>
         ) : null}
         <Form.Item name="Size" label="Size" className="inputSelect text-black">
           <Select
@@ -243,9 +260,7 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
             onBlur={formikUpdate.handleBlur}
           />
         </Form.Item>
-        {formikUpdate.touched.Size && formikUpdate.errors.Size ? (
-          <div className="error-message">{String(formikUpdate.errors.Size)}</div>
-        ) : null}
+
         <Form.Item
           name="image"
           label="Image"
@@ -278,8 +293,8 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
           </section>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
+          <Button type="primary" htmlType="submit" disabled={loading} icon={loading && <LoadingOutlined />}> 
+                Submit
           </Button>
         </Form.Item>
       </Form>

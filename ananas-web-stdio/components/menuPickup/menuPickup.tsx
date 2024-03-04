@@ -1,6 +1,7 @@
 import { Dropdown, Menu, MenuProps } from 'antd'
 import React from 'react'
 import { UserOutlined} from '@ant-design/icons';
+import Link from 'next/link';
 
 const items: MenuProps['items'] = [
     {
@@ -26,10 +27,12 @@ function MenuPickup() {
                 <p>24 orders - 09:00 AM</p>
             </Menu.Item>
             <Menu.Item key="itemPickup" style={{ marginLeft: 'auto', justifyContent: 'center'}} className='itemPickup  mt-7'>
-            <Dropdown.Button menu={menuProps} className='mt-7 max-sm:mt-0  max-sm:hidden'>
-            Pickup
-            </Dropdown.Button>
-                </Menu.Item>
+                <Link href="/" passHref>
+                <Dropdown.Button menu={menuProps} className='mt-7 max-sm:mt-0 max-sm:hidden'>
+                  Home Page
+                </Dropdown.Button>
+              </Link>
+            </Menu.Item>
         </Menu>
     </div>
   )

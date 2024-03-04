@@ -86,7 +86,6 @@ const Page: React.FC = () => {
     },
   ];
 
-  const [confirmLoading, setConfirmLoading] = useState(false);
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
   const [selectedShoeId, setSelectedShoeId] = useState<string | null>(null);
@@ -102,7 +101,7 @@ const Page: React.FC = () => {
       }catch(error) {
         toast.error( 'Error',{
           position: "top-right",
-          autoClose: 5000,
+          autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: true,
           });  
@@ -121,7 +120,7 @@ const Page: React.FC = () => {
 
         toast.success('Thành công!', {
           position: "top-right",
-          autoClose: 5000,
+          autoClose: 1000,
           hideProgressBar: false,
           closeOnClick: true,
         });
@@ -130,7 +129,7 @@ const Page: React.FC = () => {
     } catch (error) {
       toast.error('Lỗi xảy ra!', {
         position: "top-right",
-        autoClose: 5000,
+        autoClose: 1000,
         hideProgressBar: false,
         closeOnClick: true,
       });    }
@@ -210,7 +209,6 @@ const Page: React.FC = () => {
           }}
           setOpenCreate={setOpenCreate}
           shoeData={shoeData}
-
         />
 
       <UpdateShoeModal
