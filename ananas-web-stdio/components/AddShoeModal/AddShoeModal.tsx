@@ -13,6 +13,7 @@ import { createShoe } from '@/src/features/shoeSlice';
 import { useDispatch } from 'react-redux';
 import { QueryClient } from '@tanstack/react-query';
 import * as Yup from 'yup';
+import  {toast } from 'react-toastify';
 
 const sizeOptions = [
   { value: '37', label: '37' },
@@ -52,7 +53,6 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
 
   const { acceptedFiles, getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles) => {
-      console.log("Accepted Files:", acceptedFiles);
       const file = acceptedFiles[0];
       const imageUrl = URL.createObjectURL(file);
       setUploadedImage(imageUrl)
@@ -78,7 +78,12 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
         await uploadBytesResumable(storageRef, file);
         imageURL = await getDownloadURL(storageRef);
       } catch (error) {
-        console.log('error', error);
+        toast.error('Lỗi xảy ra!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
         return null;
       }
     }
@@ -99,14 +104,24 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
       await addDoc(collection(db, 'shoes'), newShoe);
       dispatch(createShoe([...shoeData, newShoe]));
 
+      toast.success('Thành công!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
       formik.resetForm();
-  
       setOpenCreate(false);
-  
+
       queryClient.invalidateQueries({ queryKey: ['shoes'] });
       refetch();
     } catch (firestoreError) {
-      console.error('Error adding shoe to Firestore:', firestoreError);
+      toast.error('Lỗi xảy ra!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
       throw firestoreError;
     }
   };
@@ -122,8 +137,12 @@ const CreateShoeModal: React.FC<CreateShoeModalProps> = ({ visible, onCancel, sh
       }
 
     } catch (error) {
-      console.error('Error creating shoe:', error);
-    }
+      toast.error('Lỗi xảy ra!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });    }
   };
   
   const handleSubmit = async () => {

@@ -12,6 +12,8 @@ import { updateShoe } from '@/src/features/shoeSlice';
 import { useDispatch } from 'react-redux';
 import { QueryClient } from '@tanstack/react-query';
 import * as Yup from 'yup';
+import  {toast } from 'react-toastify';
+
 import './UpdateShoeModal.scss'
 interface UpdateShoeModalProps {
   visible: boolean;
@@ -61,7 +63,6 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
   });
 
 
-
   const initValues: Shoe = {
     id: '',
     Name: '',
@@ -70,21 +71,36 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
     Size: [],
     imageURL:'',
   } 
-  useEffect(() => {
+  
+ const fetchOldData = async () => {
     if (selectedShoeId) {
-      const selectedShoe = shoeData.find((shoe) => shoe.id === selectedShoeId) as Shoe;
+      try {
+        const docSnap = await getDoc(doc(db, 'shoes', selectedShoeId));
+        const oldShoeData = docSnap.data() as Shoe;
 
-      if (formRefUpdate.current) {
+        if (formRefUpdate.current) {
           formRefUpdate.current.setFieldsValue({
-          Name: selectedShoe?.Name,
-          Price: selectedShoe?.Price,
-          ProductCode: selectedShoe?.ProductCode,
-          Size: selectedShoe?.Size.map((size : any) => ({ value: size, label: size })),
-          imageURL: selectedShoe?.imageURL,
-        });
-        formikUpdate.setFieldValue('imageURL', selectedShoe?.imageURL || '');
+            Name: oldShoeData?.Name,
+            Price: oldShoeData?.Price,
+            ProductCode: oldShoeData?.ProductCode,
+            Size: oldShoeData?.Size.map((size: any) => ({ value: size, label: size })),
+            imageURL: oldShoeData?.imageURL,
+          });
+          formikUpdate.setFieldValue('imageURL', oldShoeData?.imageURL || '');
+        }
+      } catch (error) {
+        toast.error('Lỗi xảy ra!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });      
       }
     }
+  };
+
+  useEffect(() => {
+    fetchOldData();
   }, [selectedShoeId, shoeData]);
 
 
@@ -106,7 +122,12 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
         imageURL = await getDownloadURL(storageRef);
   
       } catch (error) {
-        console.error("Error processing image:", error);
+        toast.error('Lỗi xảy ra!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
         return null;
       }
     }
@@ -115,8 +136,9 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
   
   const submitFormUpdate = async () => {
     try {
+      
       await formikUpdate.validateForm();
-  
+      
       const imageURL = await handleUpdateImageUpload();
   
       const updatedShoe = {
@@ -135,25 +157,38 @@ const UpdateShoeModal: React.FC<UpdateShoeModalProps> = ({visible, onCancel , se
       const updatedShoes = shoeData.map((shoe) => (shoe.id === selectedShoeId ? updatedShoe as Shoe : shoe as Shoe));
   
       dispatch(updateShoe(updatedShoes));
+      toast.success('Thành công!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
       formikUpdate.resetForm();
       setOpenUpdate(false);
       queryClient.invalidateQueries({ queryKey: ['shoes'] });
       refetch()
     } catch (error) {
-      console.error('Error updating shoe:', error);
+      toast.error('Error updating shoe!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });
     }
   };
-  
+
+  const validationSchema = Yup.object().shape({
+    Name: Yup.string().required('Name is required'),
+    Price: Yup.number().required('Price is required'),
+    ProductCode: Yup.string().required('Product Code is required'),
+    Size: Yup.array().min(1, 'Please select at least one size'),
+  }); 
+
   const formikUpdate = useFormik({
     initialValues: initValues,
     onSubmit: submitFormUpdate,
     enableReinitialize: true,
-    validationSchema: Yup.object().shape({
-      Name: Yup.string().required('Name is required'),
-      Price: Yup.number().required('Price is required'),
-      ProductCode: Yup.string().required('Product Code is required'),
-      Size: Yup.array().min(1, 'Please select at least one size'),
-    }),
+    validationSchema: validationSchema
   });
   
 

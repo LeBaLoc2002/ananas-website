@@ -7,6 +7,7 @@ export default function Home() {
   return (
         <Layout>
             <MainContent />
+            <ToastContainer />
         </Layout>
   );
 }

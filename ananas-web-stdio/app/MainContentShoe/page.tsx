@@ -1,35 +1,22 @@
 "use client"
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Image, Input, InputNumber, Layout, Modal, Table, TableColumnsType, Tag, theme } from 'antd';
+import { Button, Image,Layout, Table, TableColumnsType, Tag, theme } from 'antd';
 import './MainContentShoe.scss'
 import SiderbarShoe from '@/components/SidebarShoe/SiderbarShoe';
 import HeaderShoe from '@/components/HeaderShoe/HeaderShoe';
 import { QueryClient, useQuery } from '@tanstack/react-query';
-import { addDoc, collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDocs, setDoc } from 'firebase/firestore';
 import { useDispatch } from 'react-redux';
-import { createShoe, setShoe, updateShoe } from '@/src/features/shoeSlice';
+import { deleteShoe, setShoe} from '@/src/features/shoeSlice';
 import { db, storage } from '@/src/firebase';
-import { toast } from 'react-toastify';
-import Select from 'react-select';
-import { UploadOutlined, UserOutlined} from '@ant-design/icons';
-import { deleteObject, getDownloadURL, ref, uploadBytesResumable } from 'firebase/storage';
-import * as Yup from 'yup';
-import { useFormik } from 'formik';
-import { v4 as uuidv4 } from 'uuid';
-import {useDropzone} from 'react-dropzone'
+import { ToastContainer, toast } from 'react-toastify';
+import { deleteObject, ref } from 'firebase/storage';
 import MenuTable from '@/components/menuTable/menuTable';
 import MenuPickup from '@/components/menuPickup/menuPickup';
 import AddShoeModal from '@/components/AddShoeModal/AddShoeModal';
 import UpdateShoeModal from '@/components/UpdateShoeModal/UpdateShoeModal';
-
-interface Shoe {
-  id: string;
-  Name: string;
-  Price: number;
-  ProductCode: string;
-  Size: any;
-  imageURL: string;
-}
+import Overlay from '@/components/Overlay/Overlay';
+import 'react-toastify/dist/ReactToastify.css';
 
 
 const { Content } = Layout;
@@ -99,7 +86,6 @@ const Page: React.FC = () => {
     },
   ];
 
-  
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [openCreate, setOpenCreate] = useState(false);
   const [openUpdate, setOpenUpdate] = useState(false);
@@ -129,14 +115,25 @@ const Page: React.FC = () => {
       await deleteDoc(doc(db, 'shoes', id));
   
       if (imageURL) {
-        console.log('Deleting image at URL:', imageURL);
         const storageRef = ref(storage, imageURL);
         await deleteObject(storageRef);
+        dispatch(deleteShoe(id));
+
+        toast.success('Thành công!', {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: true,
+        });
         refetch()
       }
     } catch (error) {
-      console.error('Error deleting document: ', error);
-    }
+      toast.error('Lỗi xảy ra!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+      });    }
   };
   
 
@@ -162,8 +159,10 @@ const Page: React.FC = () => {
 
   return (
     <Layout className='max-h-screen	bg-white h-screen md:p-3	'>
+      <ToastContainer/>
       <SiderbarShoe collapsed={collapsed} />
-      <Layout className='rounded p-5 bg-cyan-100 md:m-4'  style={{borderRadius: '15px'}}>
+      <Layout style={{ borderRadius: '15px' }} className={`rounded md:m-4`}>
+      <Overlay isOpen={!collapsed} toggle={() => setCollapsed(!collapsed)} />
       <HeaderShoe collapsed={collapsed} setCollapsed={() => setCollapsed(!collapsed)} />
         <Content
           style={{
@@ -171,12 +170,12 @@ const Page: React.FC = () => {
             padding: 20,
             minHeight: 280,
             borderRadius: borderRadiusLG,
+            position: 'relative',
           }}
           className='bg-cyan-100'
         >
             <MenuPickup/>
             <MenuTable/>
-
             <Table
               title={() => (
                 <div className='flex justify-between items-center'>
@@ -220,7 +219,6 @@ const Page: React.FC = () => {
           refetch={refetch}
           onCancel={() => {
           setOpenUpdate(false);
-          // formikUpdate.resetForm({});
         }}
         width={1000}
         setOpenUpdate={setOpenUpdate}
